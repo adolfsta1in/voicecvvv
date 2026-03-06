@@ -70,109 +70,172 @@ export default function Home() {
 
       {/* Hero */}
       <section
+        className="bg-grid-pattern"
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
           padding: "100px 24px 80px",
-          maxWidth: 800,
-          margin: "0 auto",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
         <div
-          className="animate-fade-in-up"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 16px",
-            background: "var(--surface)",
-            border: "1px solid var(--border-color)",
-            borderRadius: 100,
-            fontSize: "0.8125rem",
-            color: "var(--muted)",
-            fontWeight: 500,
-            marginBottom: 32,
+            position: "absolute",
+            top: "-20%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "80vw",
+            height: "80vh",
+            background: "radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15), transparent 70%)",
+            pointerEvents: "none",
+            zIndex: 0,
           }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "#22c55e",
-            }}
-          />
-          AI-powered resume builder
-        </div>
+        />
 
-        <h1
-          className="animate-fade-in-up"
-          style={{
-            fontSize: "clamp(2.5rem, 5vw, 4rem)",
-            fontWeight: 800,
-            lineHeight: 1.1,
-            marginBottom: 24,
-            animationDelay: "0.1s",
-            letterSpacing: "-0.03em",
-          }}
-        >
-          Your story becomes
-          <br />
-          <span
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div
+            className="animate-fade-in-up"
             style={{
-              background: "linear-gradient(135deg, #6366f1, #818cf8, #6366f1)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundSize: "200% 200%",
-              animation: "gradient-shift 4s ease infinite",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 16px",
+              background: "var(--surface)",
+              border: "1px solid var(--border-color)",
+              borderRadius: 100,
+              fontSize: "0.8125rem",
+              color: "var(--color-primary)",
+              fontWeight: 600,
+              marginBottom: 32,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
             }}
           >
-            your resume
-          </span>
-        </h1>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "#22c55e",
+                boxShadow: "0 0 8px rgba(34, 197, 94, 0.6)",
+              }}
+            />
+            AI-powered resume builder
+          </div>
 
-        <p
-          className="animate-fade-in-up"
-          style={{
-            fontSize: "1.125rem",
-            color: "var(--muted)",
-            lineHeight: 1.7,
-            maxWidth: 560,
-            marginBottom: 40,
-            animationDelay: "0.2s",
-          }}
-        >
-          Stop struggling with blank pages. Just have a conversation with our AI
-          assistant, and watch your professional CV build itself in real time.
-        </p>
-
-        <div
-          className="animate-fade-in-up"
-          style={{
-            display: "flex",
-            gap: 12,
-            animationDelay: "0.3s",
-          }}
-        >
-          <Link
-            href="/app"
-            className="btn-primary"
+          <h1
+            className="animate-fade-in-up"
             style={{
-              padding: "14px 32px",
-              fontSize: "1rem",
-              textDecoration: "none",
+              fontSize: "clamp(3rem, 6vw, 4.5rem)",
+              fontWeight: 800,
+              lineHeight: 1.05,
+              marginBottom: 24,
+              animationDelay: "0.1s",
+              letterSpacing: "-0.03em",
             }}
           >
-            Start Building — It&apos;s Free
-          </Link>
+            Your story becomes
+            <br />
+            <span
+              style={{
+                background: "linear-gradient(to right, #6366f1, #a855f7, #6366f1)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundSize: "200% auto",
+                animation: "gradient-x 4s linear infinite",
+              }}
+            >
+              your resume
+            </span>
+          </h1>
+
+          <p
+            className="animate-fade-in-up"
+            style={{
+              fontSize: "1.25rem",
+              color: "var(--muted)",
+              lineHeight: 1.6,
+              maxWidth: 600,
+              marginBottom: 48,
+              animationDelay: "0.2s",
+            }}
+          >
+            Stop struggling with blank pages. Just have a conversation with our AI
+            assistant, and watch your professional CV build itself in real time.
+          </p>
+
+          <div
+            className="animate-fade-in-up"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 24,
+              animationDelay: "0.3s",
+            }}
+          >
+            <Link
+              href="/app"
+              className="btn-primary"
+              style={{
+                padding: "16px 40px",
+                fontSize: "1.125rem",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                borderRadius: 14,
+              }}
+            >
+              Start Building — It&apos;s Free
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s" }} className="group-hover:translate-x-1">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </Link>
+
+            {/* Social Proof */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
+              <div style={{ display: "flex", marginLeft: 10 }}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      background: `var(--surface-hover)`,
+                      border: "2px solid var(--background)",
+                      marginLeft: -10,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 12,
+                      overflow: "hidden"
+                    }}
+                  >
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}&backgroundColor=e2e8f0`} alt="User avatar" width="32" height="32" />
+                  </div>
+                ))}
+              </div>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ display: "flex", gap: 2, color: "#f59e0b", marginBottom: 2 }}>
+                  {"★".repeat(5)}
+                </div>
+                <div style={{ fontSize: "0.875rem", color: "var(--muted)", fontWeight: 500 }}>
+                  <strong style={{ color: "var(--foreground)" }}>10,000+</strong> CVs built
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* App Preview */}
       <section
-        className="animate-fade-in-up"
+        className="animate-fade-in-up animate-float"
         style={{
           maxWidth: 1000,
           margin: "0 auto 100px",
@@ -468,6 +531,7 @@ export default function Home() {
           ].map((item, i) => (
             <div
               key={i}
+              className="group hover:-translate-y-1 hover:shadow-xl"
               style={{
                 padding: "36px 24px",
                 borderRadius: 16,
@@ -580,6 +644,7 @@ export default function Home() {
           ].map((item, i) => (
             <div
               key={i}
+              className="group hover:-translate-y-1 hover:shadow-xl"
               style={{
                 padding: "28px 24px",
                 borderRadius: 16,
@@ -615,6 +680,67 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section
+        style={{
+          maxWidth: 800,
+          margin: "0 auto",
+          padding: "80px 24px",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <h2
+            style={{
+              fontSize: "2rem",
+              fontWeight: 800,
+              marginBottom: 12,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Frequently Asked Questions
+          </h2>
+          <p style={{ color: "var(--muted)" }}>Everything you need to know about VoiceCV.</p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {[
+            {
+              q: "Is it really free to use?",
+              a: "Yes! Creating your resume, chatting with our AI, and exporting to PDF is completely free."
+            },
+            {
+              q: "How does the AI builder work?",
+              a: "It acts like an expert career coach. You tell it your experiences in plain English (or any language), and it writes professional, metric-driven bullet points for you."
+            },
+            {
+              q: "Can I customize the design later?",
+              a: "Absolutely. Once the AI generates the content, you can switch between multiple premium layouts, change fonts, and adjust spacing in our visual editor."
+            },
+            {
+              q: "Is my data private?",
+              a: "We take privacy seriously. We don't sell your data to recruiters, and you can easily delete your account and all associated CVs at any time."
+            }
+          ].map((faq, i) => (
+            <div
+              key={i}
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border-color)",
+                padding: "24px",
+                borderRadius: 16,
+              }}
+            >
+              <h3 style={{ fontSize: "1.0625rem", fontWeight: 700, marginBottom: 8, color: "var(--foreground)" }}>
+                {faq.q}
+              </h3>
+              <p style={{ fontSize: "0.9375rem", color: "var(--muted)", lineHeight: 1.6 }}>
+                {faq.a}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* CTA */}
       <section
         style={{
@@ -630,63 +756,74 @@ export default function Home() {
             borderRadius: 24,
             background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3730a3 100%)",
             color: "white",
+            position: "relative",
+            overflow: "hidden"
           }}
         >
-          <h2
-            style={{
-              fontSize: "2rem",
-              fontWeight: 800,
-              marginBottom: 12,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Ready to build your CV?
-          </h2>
-          <p
-            style={{
-              fontSize: "1rem",
-              opacity: 0.85,
-              marginBottom: 32,
-              maxWidth: 440,
-              margin: "0 auto 32px",
-              lineHeight: 1.6,
-            }}
-          >
-            Join thousands of professionals who built their resumes through
-            conversation. It takes less than 10 minutes.
-          </p>
-          <Link
-            href="/app"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "14px 32px",
-              borderRadius: 12,
-              background: "white",
-              color: "#4f46e5",
-              fontWeight: 700,
-              fontSize: "1rem",
-              textDecoration: "none",
-              transition: "all 0.2s",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            }}
-          >
-            Start Now — Free
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {/* Decorative background elements */}
+          <div style={{ position: "absolute", top: -50, right: -50, width: 200, height: 200, background: "rgba(255,255,255,0.1)", borderRadius: "50%", filter: "blur(40px)" }} />
+          <div style={{ position: "absolute", bottom: -50, left: -50, width: 200, height: 200, background: "rgba(255,255,255,0.1)", borderRadius: "50%", filter: "blur(40px)" }} />
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <h2
+              style={{
+                fontSize: "2.25rem",
+                fontWeight: 800,
+                marginBottom: 16,
+                letterSpacing: "-0.02em",
+              }}
             >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          </Link>
+              Ready to build your CV?
+            </h2>
+            <p
+              style={{
+                fontSize: "1.0625rem",
+                opacity: 0.9,
+                marginBottom: 32,
+                maxWidth: 440,
+                margin: "0 auto 32px",
+                lineHeight: 1.6,
+              }}
+            >
+              Join thousands of professionals who built their resumes through
+              conversation. It takes less than 10 minutes.
+            </p>
+            <Link
+              href="/app"
+              className="group"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "16px 36px",
+                borderRadius: 12,
+                background: "white",
+                color: "#4f46e5",
+                fontWeight: 700,
+                fontSize: "1rem",
+                textDecoration: "none",
+                transition: "all 0.2s",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              }}
+            >
+              Start Now — Free
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="group-hover:translate-x-1"
+                style={{ transition: "transform 0.2s" }}
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -699,27 +836,18 @@ export default function Home() {
           justifyContent: "space-between",
           alignItems: "center",
           color: "var(--muted)",
-          fontSize: "0.8125rem",
+          fontSize: "0.875rem",
         }}
       >
-        <div>© 2025 VoiceCV. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} VoiceCV. All rights reserved.</div>
         <div style={{ display: "flex", gap: 24 }}>
-          <a
-            href="#"
-            style={{ color: "var(--muted)", textDecoration: "none" }}
-          >
+          <Link href="/privacy" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Privacy
-          </a>
-          <a
-            href="#"
-            style={{ color: "var(--muted)", textDecoration: "none" }}
-          >
+          </Link>
+          <Link href="/terms" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Terms
-          </a>
-          <a
-            href="#"
-            style={{ color: "var(--muted)", textDecoration: "none" }}
-          >
+          </Link>
+          <a href="mailto:support@voicecv.app" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Contact
           </a>
         </div>
