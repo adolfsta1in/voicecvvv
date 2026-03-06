@@ -21,6 +21,7 @@ export default function ChatPanel() {
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const hasInitialized = useRef(false);
     const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     function createRecognition() {
         const SpeechRecognition =
@@ -160,6 +161,55 @@ export default function ChatPanel() {
             dispatch({ type: "ADD_MESSAGE", payload: errorMsg });
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });
+        }
+    }
+
+    async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        dispatch({ type: "SET_LOADING", payload: true });
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error("Failed to upload/parse PDF");
+
+            const data = await res.json();
+            const extractedText = data.text;
+
+            const userUploadMessage: ChatMessage = {
+                id: `user_upload_${Date.now()}`,
+                role: "user",
+                content: `I have uploaded my existing CV. Here is the extracted text. Please parse this and update my CV accordingly:\n\n${extractedText}`,
+                timestamp: new Date(),
+            };
+
+            dispatch({ type: "ADD_MESSAGE", payload: userUploadMessage });
+
+            const allMessages = [...state.messages, userUploadMessage];
+            await sendToAI(allMessages);
+        } catch (error) {
+            console.error("PDF upload error:", error);
+            const errorMsg: ChatMessage = {
+                id: `err_${Date.now()}`,
+                role: "assistant",
+                content: "I'm sorry, I couldn't process that PDF file. Please try again or test with another file.",
+                timestamp: new Date(),
+            };
+            dispatch({ type: "ADD_MESSAGE", payload: errorMsg });
+            dispatch({ type: "SET_LOADING", payload: false });
+        } finally {
+            // Reset the file input so the same file can be uploaded again if needed
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     }
 
@@ -456,6 +506,48 @@ export default function ChatPanel() {
                             <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                             <line x1="12" y1="19" x2="12" y2="23" />
                             <line x1="8" y1="23" x2="16" y2="23" />
+                        </svg>
+                    </button>
+
+                    <input
+                        type="file"
+                        accept="application/pdf"
+                        style={{ display: "none" }}
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        title="Upload existing CV (PDF)"
+                        disabled={state.isLoading}
+                        style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
+                            border: "1px solid var(--border-color)",
+                            background: "var(--surface)",
+                            color: "var(--muted)",
+                            cursor: state.isLoading ? "default" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "all 0.2s",
+                            flexShrink: 0,
+                        }}
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
                     </button>
 

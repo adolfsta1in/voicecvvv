@@ -147,7 +147,7 @@ export default function Home() {
                 animation: "gradient-x 4s linear infinite",
               }}
             >
-              your resume
+              your better resume
             </span>
           </h1>
 
@@ -162,8 +162,8 @@ export default function Home() {
               animationDelay: "0.2s",
             }}
           >
-            Stop struggling with blank pages. Just have a conversation with our AI
-            assistant, and watch your professional CV build itself in real time.
+            Stop struggling with blank pages. Chat with our AI assistant to build from scratch,
+            or upload your existing CV to have AI rewrite and format it instantly.
           </p>
 
           <div
@@ -513,8 +513,8 @@ export default function Home() {
             {
               step: "01",
               icon: "💬",
-              title: "Tell Your Story",
-              desc: "Chat naturally with our AI. It asks thoughtful questions about your career, experience, and achievements.",
+              title: "Start or Upload",
+              desc: "Chat naturally with our AI to build from scratch, or drop in your existing PDF resume.",
             },
             {
               step: "02",
