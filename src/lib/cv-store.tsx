@@ -2,22 +2,35 @@
 
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
 import { CVData, ChatMessage, emptyCVData } from "./cv-types";
+import { TemplateId } from "./cv-templates";
 
 interface CVState {
     messages: ChatMessage[];
     cvData: CVData;
     isLoading: boolean;
+    templateId: TemplateId;
+    cvId: string | null;
 }
 
 type CVAction =
     | { type: "ADD_MESSAGE"; payload: ChatMessage }
     | { type: "UPDATE_CV"; payload: Partial<CVData> }
-    | { type: "SET_LOADING"; payload: boolean };
+    | { type: "SET_LOADING"; payload: boolean }
+    | { type: "SET_TEMPLATE"; payload: TemplateId }
+    | { type: "SET_CV_ID"; payload: string | null }
+    | { type: "LOAD_CV"; payload: { cvId: string; templateId: TemplateId; data: CVData } }
+    | { type: "REORDER_SECTIONS"; payload: string[] }
+    | { type: "REORDER_LIST"; payload: { path: keyof CVData; newOrder: unknown[] } }
+    | { type: "SET_THEME_COLOR"; payload: string }
+    | { type: "SET_SPACING"; payload: "tight" | "normal" | "relaxed" }
+    | { type: "SET_FONT_SIZE"; payload: "small" | "normal" | "large" };
 
 const initialState: CVState = {
     messages: [],
     cvData: { ...emptyCVData },
     isLoading: false,
+    templateId: "classic",
+    cvId: null,
 };
 
 function mergeCV(current: CVData, update: Partial<CVData>): CVData {
@@ -32,6 +45,7 @@ function mergeCV(current: CVData, update: Partial<CVData>): CVData {
         skills: update.skills ?? current.skills,
         languages: update.languages ?? current.languages,
         certifications: update.certifications ?? current.certifications,
+        layout: update.layout ?? current.layout,
     };
 }
 
@@ -43,6 +57,42 @@ function cvReducer(state: CVState, action: CVAction): CVState {
             return { ...state, cvData: mergeCV(state.cvData, action.payload) };
         case "SET_LOADING":
             return { ...state, isLoading: action.payload };
+        case "SET_TEMPLATE":
+            return { ...state, templateId: action.payload };
+        case "SET_CV_ID":
+            return { ...state, cvId: action.payload };
+        case "LOAD_CV":
+            return {
+                ...state,
+                cvId: action.payload.cvId,
+                templateId: action.payload.templateId,
+                cvData: action.payload.data,
+            };
+        case "REORDER_SECTIONS":
+            return {
+                ...state,
+                cvData: { ...state.cvData, layout: { ...state.cvData.layout, sectionOrder: action.payload } },
+            };
+        case "REORDER_LIST":
+            return {
+                ...state,
+                cvData: { ...state.cvData, [action.payload.path]: action.payload.newOrder },
+            };
+        case "SET_THEME_COLOR":
+            return {
+                ...state,
+                cvData: { ...state.cvData, layout: { ...state.cvData.layout, themeColor: action.payload } },
+            };
+        case "SET_SPACING":
+            return {
+                ...state,
+                cvData: { ...state.cvData, layout: { ...state.cvData.layout, documentSpacing: action.payload } },
+            };
+        case "SET_FONT_SIZE":
+            return {
+                ...state,
+                cvData: { ...state.cvData, layout: { ...state.cvData.layout, fontSize: action.payload } },
+            };
         default:
             return state;
     }

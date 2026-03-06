@@ -30,6 +30,13 @@ export interface Education {
   highlights?: string[];
 }
 
+export interface CVLayout {
+  sectionOrder: string[];
+  themeColor?: string;
+  documentSpacing?: "tight" | "normal" | "relaxed";
+  fontSize?: "small" | "normal" | "large";
+}
+
 export interface CVData {
   personalInfo: PersonalInfo;
   summary: string;
@@ -38,6 +45,8 @@ export interface CVData {
   skills: string[];
   languages?: string[];
   certifications?: string[];
+  templateId?: string;
+  layout: CVLayout;
 }
 
 export interface ChatMessage {
@@ -66,4 +75,9 @@ export const emptyCVData: CVData = {
   skills: [],
   languages: [],
   certifications: [],
+  layout: {
+    sectionOrder: ["summary", "experience", "education", "certifications", "skills", "languages"],
+    documentSpacing: "normal",
+    fontSize: "normal",
+  },
 };

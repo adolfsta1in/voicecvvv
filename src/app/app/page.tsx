@@ -1,13 +1,50 @@
 "use client";
 
-import { CVProvider } from "@/lib/cv-store";
+import { CVProvider, useCVStore } from "@/lib/cv-store";
+import { getCV } from "@/lib/cv-api";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import TopBar from "@/components/TopBar";
 import ChatPanel from "@/components/ChatPanel";
 import CVPreview from "@/components/CVPreview";
+import DesignSidebar from "@/components/DesignSidebar";
+import { TemplateId } from "@/lib/cv-templates";
+
+function CVLoader() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id");
+    const { dispatch } = useCVStore();
+
+    useEffect(() => {
+        if (!id) return;
+        async function load() {
+            dispatch({ type: "SET_LOADING", payload: true });
+            const data = await getCV(id!);
+            if (data) {
+                dispatch({
+                    type: "LOAD_CV",
+                    payload: {
+                        cvId: data.id,
+                        templateId: (data.content.templateId as TemplateId) || "classic",
+                        data: data.content,
+                    },
+                });
+            }
+            dispatch({ type: "SET_LOADING", payload: false });
+        }
+        load();
+    }, [id, dispatch]);
+
+    return null;
+}
 
 export default function AppPage() {
     return (
         <CVProvider>
+            <Suspense fallback={null}>
+                <CVLoader />
+            </Suspense>
             <div
                 style={{
                     display: "flex",
@@ -17,7 +54,9 @@ export default function AppPage() {
                     overflow: "hidden",
                 }}
             >
-                <TopBar />
+                <div className="hide-on-print">
+                    <TopBar />
+                </div>
                 <div
                     style={{
                         display: "flex",
@@ -27,6 +66,7 @@ export default function AppPage() {
                 >
                     {/* Chat Panel */}
                     <div
+                        className="hide-on-print"
                         style={{
                             width: "40%",
                             minWidth: 340,
@@ -40,6 +80,7 @@ export default function AppPage() {
 
                     {/* CV Preview */}
                     <div
+                        className="print-fullscreen"
                         style={{
                             flex: 1,
                             overflow: "hidden",
@@ -47,6 +88,19 @@ export default function AppPage() {
                         }}
                     >
                         <CVPreview />
+                    </div>
+
+                    {/* Design Sidebar */}
+                    <div
+                        className="hide-on-print"
+                        style={{
+                            width: 280,
+                            flexShrink: 0,
+                            background: "var(--surface)",
+                            zIndex: 10,
+                        }}
+                    >
+                        <DesignSidebar />
                     </div>
                 </div>
             </div>

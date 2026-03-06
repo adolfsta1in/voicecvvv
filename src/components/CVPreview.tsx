@@ -1,11 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useCVStore } from "@/lib/cv-store";
+import { applyPatch } from "@/lib/cv-patch";
+
+// Template imports
+import ClassicTemplate from "@/components/templates/ClassicTemplate";
+import MinimalTemplate from "@/components/templates/MinimalTemplate";
+import SidebarTemplate from "@/components/templates/SidebarTemplate";
+import ExecutiveTemplate from "@/components/templates/ExecutiveTemplate";
+import CreativeTemplate from "@/components/templates/CreativeTemplate";
+import CompactTemplate from "@/components/templates/CompactTemplate";
+import ModernTemplate from "@/components/templates/ModernTemplate";
+import ProfessionalTemplate from "@/components/templates/ProfessionalTemplate";
+import ElegantTemplate from "@/components/templates/ElegantTemplate";
+import TechTemplate from "@/components/templates/TechTemplate";
 
 export default function CVPreview() {
-    const { state } = useCVStore();
+    const { state, dispatch } = useCVStore();
     const cv = state.cvData;
+    const templateId = state.templateId;
+    const layoutInfo = state.cvData.layout || {};
+    const fontSize = layoutInfo.fontSize || "normal";
+    const spacing = layoutInfo.documentSpacing || "normal";
+
+    const fontScale = fontSize === "small" ? "14px" : fontSize === "large" ? "18px" : "16px";
+    const spaceScale = spacing === "tight" ? 0.85 : spacing === "relaxed" ? 1.25 : 1;
 
     const hasAnyContent =
         cv.personalInfo.fullName ||
@@ -14,29 +34,77 @@ export default function CVPreview() {
         cv.education.length > 0 ||
         cv.skills.length > 0;
 
+    const handleFieldChange = useCallback(
+        (path: string, value: string) => {
+            const patch = applyPatch(cv, path, value);
+            if (Object.keys(patch).length > 0) {
+                dispatch({ type: "UPDATE_CV", payload: patch });
+            }
+        },
+        [cv, dispatch],
+    );
+
+    function renderTemplate() {
+        const props = { cv, onFieldChange: handleFieldChange };
+        switch (templateId) {
+            case "minimal": return <MinimalTemplate {...props} />;
+            case "sidebar": return <SidebarTemplate {...props} />;
+            case "executive": return <ExecutiveTemplate {...props} />;
+            case "creative": return <CreativeTemplate {...props} />;
+            case "compact": return <CompactTemplate {...props} />;
+            case "modern": return <ModernTemplate {...props} />;
+            case "professional": return <ProfessionalTemplate {...props} />;
+            case "elegant": return <ElegantTemplate {...props} />;
+            case "tech": return <TechTemplate {...props} />;
+            case "classic":
+            default: return <ClassicTemplate {...props} />;
+        }
+    }
+
     return (
-        <div
-            style={{
-                height: "100%",
-                overflowY: "auto",
-                padding: "32px 24px",
-                display: "flex",
-                justifyContent: "center",
-            }}
-        >
+        <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <style>{`
+                #cv-preview-content {
+                    font-size: ${fontScale} !important;
+                }
+                #cv-preview-content * {
+                    line-height: calc(1.6 * ${spaceScale}) !important;
+                }
+            `}</style>
+
+            {/* Edit hint bar */}
+            {hasAnyContent && (
+                <div
+                    className="hide-on-print"
+                    style={{
+                        padding: "5px 16px",
+                        background: "var(--surface)",
+                        borderBottom: "1px solid var(--border-color)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        flexShrink: 0,
+                    }}
+                >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>
+                        Click any text in the document to edit it directly
+                    </span>
+                </div>
+            )}
+
+            {/* Scrollable CV area */}
             <div
-                id="cv-preview-content"
-                className="cv-document"
                 style={{
-                    width: "100%",
-                    maxWidth: 700,
-                    minHeight: 900,
-                    padding: "48px 48px",
-                    borderRadius: 8,
-                    boxShadow:
-                        "0 1px 3px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.06)",
-                    border: "1px solid #e5e7eb",
-                    position: "relative",
+                    flex: 1,
+                    overflowY: "auto",
+                    padding: "24px 24px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
                 }}
             >
                 {!hasAnyContent ? (
@@ -47,7 +115,7 @@ export default function CVPreview() {
                             alignItems: "center",
                             justifyContent: "center",
                             height: "100%",
-                            minHeight: 600,
+                            minHeight: 500,
                             textAlign: "center",
                             color: "#94a3b8",
                         }}
@@ -61,387 +129,48 @@ export default function CVPreview() {
                         </div>
                     </div>
                 ) : (
-                    <div className="animate-fade-in">
-                        {/* Header */}
-                        {cv.personalInfo.fullName && (
-                            <div
-                                className="animate-fade-in-up"
-                                style={{ marginBottom: 24, textAlign: "center" }}
-                            >
-                                <h1
-                                    style={{
-                                        fontSize: "1.75rem",
-                                        fontWeight: 800,
-                                        color: "#1a1a2e",
-                                        marginBottom: 4,
-                                    }}
-                                >
-                                    {cv.personalInfo.fullName}
-                                </h1>
-                                {cv.personalInfo.title && (
-                                    <div
-                                        style={{
-                                            fontSize: "1rem",
-                                            color: "#6366f1",
-                                            fontWeight: 500,
-                                            marginBottom: 8,
-                                        }}
-                                    >
-                                        {cv.personalInfo.title}
-                                    </div>
-                                )}
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        flexWrap: "wrap",
-                                        gap: "8px 16px",
-                                        fontSize: "0.8125rem",
-                                        color: "#6b7280",
-                                    }}
-                                >
-                                    {cv.personalInfo.email && (
-                                        <span>{cv.personalInfo.email}</span>
-                                    )}
-                                    {cv.personalInfo.phone && (
-                                        <span>•  {cv.personalInfo.phone}</span>
-                                    )}
-                                    {cv.personalInfo.location && (
-                                        <span>•  {cv.personalInfo.location}</span>
-                                    )}
-                                    {cv.personalInfo.linkedin && (
-                                        <span>•  {cv.personalInfo.linkedin}</span>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                    <div
+                        id="cv-preview-content"
+                        className="cv-document animate-fade-in"
+                        style={{
+                            position: "relative",
+                            display: "flex",
+                            flexDirection: "column",
+                            width: "794px",
+                            minHeight: "1123px",
+                            padding: templateId === "sidebar" || templateId === "executive" || templateId === "creative" ? 0 : "48px 56px",
+                            borderRadius: 8,
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 8px 30px rgba(0,0,0,0.06)",
+                            border: "1px solid #e5e7eb",
+                            flexShrink: 0,
+                            overflow: "hidden", // clip the page break overlay
+                        }}
+                    >
+                        {/* Page break indicators */}
+                        <div
+                            className="hide-on-print"
+                            style={{
+                                position: "absolute",
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                zIndex: 100,
+                                pointerEvents: "none",
+                                backgroundImage: "repeating-linear-gradient(to bottom, transparent, transparent 1122px, rgba(99, 102, 241, 0.4) 1122px, rgba(99, 102, 241, 0.4) 1123px)",
+                            }}
+                        />
+                        {/* A small "Page Break" label that repeats every 1123px */}
+                        <div
+                            className="hide-on-print"
+                            style={{
+                                position: "absolute",
+                                top: 0, left: 0, right: 0, bottom: 0,
+                                zIndex: 100,
+                                pointerEvents: "none",
+                                backgroundImage: "repeating-linear-gradient(to bottom, transparent, transparent 1110px, rgba(99, 102, 241, 0.1) 1110px, rgba(99, 102, 241, 0.1) 1122px)",
+                                backgroundSize: "100% 1123px",
+                            }}
+                        />
 
-                        {/* Summary */}
-                        {cv.summary && (
-                            <div className="animate-fade-in-up" style={{ marginBottom: 24 }}>
-                                <h2
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.1em",
-                                        color: "#6366f1",
-                                        borderBottom: "2px solid #6366f1",
-                                        paddingBottom: 4,
-                                        marginBottom: 10,
-                                    }}
-                                >
-                                    Professional Summary
-                                </h2>
-                                <p
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        color: "#374151",
-                                        lineHeight: 1.7,
-                                    }}
-                                >
-                                    {cv.summary}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Experience */}
-                        {cv.experience.length > 0 && (
-                            <div className="animate-fade-in-up" style={{ marginBottom: 24 }}>
-                                <h2
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.1em",
-                                        color: "#6366f1",
-                                        borderBottom: "2px solid #6366f1",
-                                        paddingBottom: 4,
-                                        marginBottom: 14,
-                                    }}
-                                >
-                                    Experience
-                                </h2>
-                                {cv.experience.map((exp) => (
-                                    <div
-                                        key={exp.id}
-                                        className="animate-fade-in-up"
-                                        style={{ marginBottom: 16 }}
-                                    >
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "baseline",
-                                                marginBottom: 2,
-                                            }}
-                                        >
-                                            <h3
-                                                style={{
-                                                    fontSize: "0.9375rem",
-                                                    fontWeight: 700,
-                                                    color: "#1a1a2e",
-                                                }}
-                                            >
-                                                {exp.jobTitle}
-                                            </h3>
-                                            <span
-                                                style={{
-                                                    fontSize: "0.75rem",
-                                                    color: "#6b7280",
-                                                    flexShrink: 0,
-                                                    marginLeft: 8,
-                                                }}
-                                            >
-                                                {exp.startDate} — {exp.endDate}
-                                            </span>
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: "0.8125rem",
-                                                color: "#6366f1",
-                                                fontWeight: 500,
-                                                marginBottom: 6,
-                                            }}
-                                        >
-                                            {exp.company}
-                                            {exp.location ? ` · ${exp.location}` : ""}
-                                        </div>
-                                        {exp.description.length > 0 && (
-                                            <ul
-                                                style={{
-                                                    paddingLeft: 18,
-                                                    listStyleType: "disc",
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    gap: 3,
-                                                }}
-                                            >
-                                                {exp.description.map((d, i) => (
-                                                    <li
-                                                        key={i}
-                                                        style={{
-                                                            fontSize: "0.8125rem",
-                                                            color: "#374151",
-                                                            lineHeight: 1.6,
-                                                        }}
-                                                    >
-                                                        {d}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Education */}
-                        {cv.education.length > 0 && (
-                            <div className="animate-fade-in-up" style={{ marginBottom: 24 }}>
-                                <h2
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.1em",
-                                        color: "#6366f1",
-                                        borderBottom: "2px solid #6366f1",
-                                        paddingBottom: 4,
-                                        marginBottom: 14,
-                                    }}
-                                >
-                                    Education
-                                </h2>
-                                {cv.education.map((edu) => (
-                                    <div
-                                        key={edu.id}
-                                        className="animate-fade-in-up"
-                                        style={{ marginBottom: 12 }}
-                                    >
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "baseline",
-                                                marginBottom: 2,
-                                            }}
-                                        >
-                                            <h3
-                                                style={{
-                                                    fontSize: "0.9375rem",
-                                                    fontWeight: 700,
-                                                    color: "#1a1a2e",
-                                                }}
-                                            >
-                                                {edu.degree}
-                                            </h3>
-                                            <span
-                                                style={{
-                                                    fontSize: "0.75rem",
-                                                    color: "#6b7280",
-                                                    flexShrink: 0,
-                                                    marginLeft: 8,
-                                                }}
-                                            >
-                                                {edu.startDate} — {edu.endDate}
-                                            </span>
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: "0.8125rem",
-                                                color: "#6366f1",
-                                                fontWeight: 500,
-                                            }}
-                                        >
-                                            {edu.institution}
-                                            {edu.location ? ` · ${edu.location}` : ""}
-                                        </div>
-                                        {edu.gpa && (
-                                            <div
-                                                style={{
-                                                    fontSize: "0.8125rem",
-                                                    color: "#6b7280",
-                                                    marginTop: 2,
-                                                }}
-                                            >
-                                                GPA: {edu.gpa}
-                                            </div>
-                                        )}
-                                        {edu.highlights && edu.highlights.length > 0 && (
-                                            <ul style={{ paddingLeft: 18, listStyleType: "disc", marginTop: 4 }}>
-                                                {edu.highlights.map((h, i) => (
-                                                    <li
-                                                        key={i}
-                                                        style={{
-                                                            fontSize: "0.8125rem",
-                                                            color: "#374151",
-                                                            lineHeight: 1.6,
-                                                        }}
-                                                    >
-                                                        {h}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Skills */}
-                        {cv.skills.length > 0 && (
-                            <div className="animate-fade-in-up" style={{ marginBottom: 24 }}>
-                                <h2
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.1em",
-                                        color: "#6366f1",
-                                        borderBottom: "2px solid #6366f1",
-                                        paddingBottom: 4,
-                                        marginBottom: 10,
-                                    }}
-                                >
-                                    Skills
-                                </h2>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                                    {cv.skills.map((skill, i) => (
-                                        <span
-                                            key={i}
-                                            style={{
-                                                fontSize: "0.75rem",
-                                                padding: "4px 12px",
-                                                background: "#f0f0ff",
-                                                color: "#4f46e5",
-                                                borderRadius: 20,
-                                                fontWeight: 500,
-                                            }}
-                                        >
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Languages */}
-                        {cv.languages && cv.languages.length > 0 && (
-                            <div className="animate-fade-in-up" style={{ marginBottom: 24 }}>
-                                <h2
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.1em",
-                                        color: "#6366f1",
-                                        borderBottom: "2px solid #6366f1",
-                                        paddingBottom: 4,
-                                        marginBottom: 10,
-                                    }}
-                                >
-                                    Languages
-                                </h2>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexWrap: "wrap",
-                                        gap: 6,
-                                    }}
-                                >
-                                    {cv.languages.map((lang, i) => (
-                                        <span
-                                            key={i}
-                                            style={{
-                                                fontSize: "0.75rem",
-                                                padding: "4px 12px",
-                                                background: "#fef3c7",
-                                                color: "#92400e",
-                                                borderRadius: 20,
-                                                fontWeight: 500,
-                                            }}
-                                        >
-                                            {lang}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Certifications */}
-                        {cv.certifications && cv.certifications.length > 0 && (
-                            <div className="animate-fade-in-up">
-                                <h2
-                                    style={{
-                                        fontSize: "0.8125rem",
-                                        fontWeight: 700,
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.1em",
-                                        color: "#6366f1",
-                                        borderBottom: "2px solid #6366f1",
-                                        paddingBottom: 4,
-                                        marginBottom: 10,
-                                    }}
-                                >
-                                    Certifications
-                                </h2>
-                                <ul style={{ paddingLeft: 18, listStyleType: "disc" }}>
-                                    {cv.certifications.map((cert, i) => (
-                                        <li
-                                            key={i}
-                                            style={{
-                                                fontSize: "0.8125rem",
-                                                color: "#374151",
-                                                lineHeight: 1.6,
-                                            }}
-                                        >
-                                            {cert}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+                        {renderTemplate()}
                     </div>
                 )}
             </div>

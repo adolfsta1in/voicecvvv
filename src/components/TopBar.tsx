@@ -1,14 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useCVStore } from "@/lib/cv-store";
 import { exportToPDF } from "@/lib/pdf-export";
+import { saveCV } from "@/lib/cv-api";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
 
 export default function TopBar() {
-    const { state } = useCVStore();
+    const { state, dispatch } = useCVStore();
     const cv = state.cvData;
+    const templateId = state.templateId;
+    const cvId = state.cvId;
+    const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "autosaving" | "autosaved" | "error">("idle");
 
     // Calculate completion percentage
     const sections = [
@@ -22,9 +27,49 @@ export default function TopBar() {
     const filled = sections.filter(Boolean).length;
     const progress = Math.round((filled / sections.length) * 100);
 
-    async function handleExport() {
+    const handleExport = async () => {
         await exportToPDF(cv);
-    }
+    };
+
+    const handleSave = React.useCallback(async (isAuto = false) => {
+        if (!cv.personalInfo.fullName) return;
+        setSaveStatus(isAuto ? "autosaving" : "saving");
+        try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { setSaveStatus("error"); return; }
+            const name = cv.personalInfo.fullName
+                ? `${cv.personalInfo.fullName}'s CV`
+                : "My CV";
+
+            const contentToSave = { ...cv, templateId };
+            const result = await saveCV(user.id, name, contentToSave, cvId || undefined);
+
+            if (result) {
+                setSaveStatus(isAuto ? "autosaved" : "saved");
+                if (!cvId) {
+                    dispatch({ type: "SET_CV_ID", payload: result.id });
+                }
+            } else {
+                setSaveStatus("error");
+            }
+        } catch {
+            setSaveStatus("error");
+        } finally {
+            setTimeout(() => setSaveStatus("idle"), 2500);
+        }
+    }, [cv, templateId, cvId, dispatch]);
+
+    // Auto-save effect
+    React.useEffect(() => {
+        if (!cv.personalInfo.fullName) return;
+
+        const timeoutId = setTimeout(() => {
+            handleSave(true);
+        }, 3000); // Auto-save 3 seconds after the last change
+
+        return () => clearTimeout(timeoutId);
+    }, [cv, templateId, handleSave]);
 
     return (
         <div
@@ -114,6 +159,60 @@ export default function TopBar() {
 
             {/* Right */}
             <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                <Link
+                    href="/account"
+                    style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--muted)",
+                        fontSize: "0.8125rem",
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                    }}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    My CVs
+                </Link>
+                <button
+                    onClick={() => handleSave(false)}
+                    disabled={!cv.personalInfo.fullName || saveStatus === "saving" || saveStatus === "autosaving"}
+                    style={{
+                        padding: "7px 16px",
+                        borderRadius: 9,
+                        border: "1px solid var(--border-color)",
+                        background:
+                            saveStatus === "saved" || saveStatus === "autosaved"
+                                ? "#10b981"
+                                : saveStatus === "error"
+                                    ? "#ef4444"
+                                    : "var(--surface)",
+                        color:
+                            saveStatus === "idle" || saveStatus === "saving" || saveStatus === "autosaving"
+                                ? "var(--foreground)"
+                                : "white",
+                        fontSize: "0.8125rem",
+                        fontWeight: 600,
+                        cursor: cv.personalInfo.fullName ? "pointer" : "default",
+                        opacity: cv.personalInfo.fullName ? 1 : 0.45,
+                        transition: "all 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                    }}
+                >
+                    {saveStatus === "saving" ? "Saving..." :
+                        saveStatus === "autosaving" ? "Auto-saving..." :
+                            saveStatus === "saved" ? "✓ Saved" :
+                                saveStatus === "autosaved" ? "✓ Auto-saved" :
+                                    saveStatus === "error" ? "Error" : "Save CV"}
+                </button>
                 <button
                     onClick={() => logout()}
                     style={{

@@ -4,11 +4,14 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useCVStore } from "@/lib/cv-store";
 import { ChatMessage } from "@/lib/cv-types";
 
+import ReactMarkdown from "react-markdown";
+
 // Extend Window for SpeechRecognition
 interface SpeechRecognitionEvent {
     results: { [key: number]: { [key: number]: { transcript: string } } };
     resultIndex: number;
 }
+
 
 export default function ChatPanel() {
     const { state, dispatch } = useCVStore();
@@ -299,7 +302,15 @@ export default function ChatPanel() {
                                             : "0 1px 4px rgba(0,0,0,0.04)",
                                 }}
                             >
-                                {msg.content}
+                                {msg.role === "assistant" ? (
+                                    <div className="chat-markdown">
+                                        <ReactMarkdown>
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    msg.content
+                                )}
                             </div>
                         </div>
                     ))}

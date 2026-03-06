@@ -3,27 +3,47 @@
 import { CVData } from "./cv-types";
 
 export async function exportToPDF(cvData: CVData) {
-    // Dynamic import to avoid SSR issues
-    const html2pdf = (await import("html2pdf.js")).default;
+    if (typeof window === "undefined") return;
 
-    const element = document.getElementById("cv-preview-content");
-    if (!element) return;
+    try {
+        // We capture the entire document HTML so stylesheets are included
+        const html = document.documentElement.outerHTML;
+        const origin = window.location.origin;
 
-    const opt = {
-        margin: 0,
-        filename: `${cvData.personalInfo.fullName || "My"}_CV.pdf`,
-        image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            letterRendering: true,
-        },
-        jsPDF: {
-            unit: "mm",
-            format: "a4",
-            orientation: "portrait" as const,
-        },
-    };
+        const response = await fetch('/api/pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ html, origin }),
+        });
 
-    await html2pdf().set(opt).from(element).save();
+        if (!response.ok) {
+            throw new Error(`PDF generation failed: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+
+        // Create an invisible <a> tag to trigger the automatic file download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+
+        const fileName = cvData.personalInfo?.fullName
+            ? `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`
+            : "CV.pdf";
+
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+
+        // Cleanup
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }, 100);
+
+    } catch (error) {
+        console.error("Error exporting PDF via server API:", error);
+        alert("Failed to generate PDF. Please try again.");
+    }
 }
