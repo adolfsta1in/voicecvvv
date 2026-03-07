@@ -12,91 +12,64 @@ export async function exportToPDF(cvData: CVData) {
     }
 
     const fileName = cvData.personalInfo?.fullName
-        ? `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV`
-        : "CV";
+        ? `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`
+        : "CV.pdf";
 
-    // Clone the CV content
-    const clone = element.cloneNode(true) as HTMLElement;
+    try {
+        const html2canvas = (await import("html2canvas")).default;
+        const { jsPDF } = await import("jspdf");
 
-    // Remove UI-only elements (page break indicators, edit hints, etc.)
-    clone.querySelectorAll(".hide-on-print").forEach(el => el.remove());
+        // A4 dimensions in mm
+        const A4_WIDTH_MM = 210;
+        const A4_HEIGHT_MM = 297;
 
-    // Remove contenteditable attributes
-    clone.querySelectorAll("[contenteditable]").forEach(el => {
-        el.removeAttribute("contenteditable");
-    });
+        // Render the element to a canvas
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+            // Ignore UI-only elements
+            ignoreElements: (el) => el.classList?.contains("hide-on-print"),
+        });
 
-    // Gather all stylesheets from the current page
-    const stylesheets = Array.from(document.styleSheets);
-    let cssText = "";
-    for (const sheet of stylesheets) {
-        try {
-            const rules = Array.from(sheet.cssRules || []);
-            for (const rule of rules) {
-                cssText += rule.cssText + "\n";
-            }
-        } catch {
-            // Cross-origin stylesheets can't be read — skip them
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+        // Calculate how many A4 pages we need
+        const imgWidthPx = canvas.width;
+        const imgHeightPx = canvas.height;
+
+        // Scale: fit the image width to A4 width
+        const pdfWidth = A4_WIDTH_MM;
+        const pdfHeight = (imgHeightPx * pdfWidth) / imgWidthPx;
+
+        const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4",
+        });
+
+        // If the content is taller than one page, split across pages
+        let remainingHeight = pdfHeight;
+        let position = 0;
+
+        // First page
+        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
+        remainingHeight -= A4_HEIGHT_MM;
+
+        // Add more pages if content overflows
+        while (remainingHeight > 0) {
+            position -= A4_HEIGHT_MM;
+            pdf.addPage();
+            pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
+            remainingHeight -= A4_HEIGHT_MM;
         }
+
+        // Trigger instant download
+        pdf.save(fileName);
+
+    } catch (error) {
+        console.error("Error exporting PDF:", error);
+        alert("Failed to generate PDF. Please try again.");
     }
-
-    // Open a new window for printing
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-        alert("Pop-up blocked! Please allow pop-ups for this site and try again.");
-        return;
-    }
-
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${fileName}</title>
-            <style>
-                ${cssText}
-
-                /* Print-specific overrides */
-                @page {
-                    size: A4;
-                    margin: 0;
-                }
-                *, *::before, *::after {
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                    color-adjust: exact !important;
-                }
-                body {
-                    margin: 0;
-                    padding: 0;
-                    background: #ffffff !important;
-                    color: #000000 !important;
-                }
-                .cv-print-container {
-                    width: 794px;
-                    margin: 0 auto;
-                    background: #ffffff !important;
-                }
-                .hide-on-print {
-                    display: none !important;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="cv-print-container">
-                ${clone.outerHTML}
-            </div>
-            <script>
-                // Auto-trigger print dialog once the page loads
-                window.onload = function() {
-                    setTimeout(function() {
-                        window.print();
-                        // Close the window after printing (or cancelling)
-                        setTimeout(function() { window.close(); }, 500);
-                    }, 300);
-                };
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
 }
