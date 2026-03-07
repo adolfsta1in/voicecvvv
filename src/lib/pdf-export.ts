@@ -1,13 +1,16 @@
 "use client";
 
 import { CVData } from "./cv-types";
-// @ts-ignore - html2pdf doesn't have good type definitions out of the box
-import html2pdf from "html2pdf.js";
 
 export async function exportToPDF(cvData: CVData) {
     if (typeof window === "undefined") return;
 
     try {
+        // Dynamically import html2pdf to avoid SSR issues during build
+        // @ts-ignore
+        const html2pdfModule = await import("html2pdf.js");
+        const html2pdf: any = html2pdfModule.default ? html2pdfModule.default : html2pdfModule;
+
         // The container holding the CV in the UI
         const element = document.getElementById("cv-preview-content");
         if (!element) {
