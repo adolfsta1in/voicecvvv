@@ -2,9 +2,6 @@
 
 import { CVData } from "./cv-types";
 
-/**
- * Loads a script from a CDN URL and returns a promise that resolves when loaded.
- */
 function loadScript(src: string): Promise<void> {
     return new Promise((resolve, reject) => {
         if (document.querySelector(`script[src="${src}"]`)) {
@@ -20,18 +17,22 @@ function loadScript(src: string): Promise<void> {
 }
 
 /**
- * Sanitize unsupported CSS color functions (lab, oklch, oklab, lch, color)
- * by replacing them with the browser's computed rgb/rgba values.
- * This only touches colors that would crash html2canvas — everything else stays intact.
+ * Force ALL color-related CSS properties on every element to their
+ * computed rgb/rgba values as inline styles. This ensures html2canvas
+ * never encounters unsupported color functions (lab, oklch, etc.)
+ * from stylesheets.
  */
-function sanitizeColors(root: HTMLElement) {
-    const unsupported = /\b(lab|oklch|oklab|lch|color)\s*\(/i;
-
-    const cssColorProps = [
-        "color", "background-color", "border-color",
-        "border-top-color", "border-right-color",
-        "border-bottom-color", "border-left-color",
-        "outline-color", "text-decoration-color",
+function forceComputedColors(root: HTMLElement) {
+    const colorProps = [
+        "color",
+        "background-color",
+        "border-color",
+        "border-top-color",
+        "border-right-color",
+        "border-bottom-color",
+        "border-left-color",
+        "outline-color",
+        "text-decoration-color",
     ];
 
     const elements = [root, ...Array.from(root.querySelectorAll("*"))] as HTMLElement[];
@@ -39,32 +40,31 @@ function sanitizeColors(root: HTMLElement) {
     for (const el of elements) {
         const computed = window.getComputedStyle(el);
 
-        for (const prop of cssColorProps) {
-            try {
-                const val = el.style.getPropertyValue(prop);
-                if (val && unsupported.test(val)) {
-                    // Browser computed style is always rgb/rgba
-                    el.style.setProperty(prop, computed.getPropertyValue(prop), "important");
-                }
-            } catch { /* skip */ }
+        // Force every color property to its computed rgb value as inline style
+        for (const prop of colorProps) {
+            const val = computed.getPropertyValue(prop);
+            if (val && val !== "rgba(0, 0, 0, 0)" && val !== "transparent") {
+                el.style.setProperty(prop, val);
+            }
         }
 
-        // Check inline background shorthand 
-        try {
-            const bgInline = el.style.getPropertyValue("background");
-            if (bgInline && unsupported.test(bgInline)) {
-                const bgColor = computed.getPropertyValue("background-color");
-                el.style.setProperty("background", bgColor, "important");
-            }
-        } catch { /* skip */ }
+        // Handle background (could have gradients with lab colors)
+        const bgImage = computed.getPropertyValue("background-image");
+        if (bgImage && bgImage !== "none") {
+            el.style.setProperty("background-image", bgImage);
+        }
+        const bgColor = computed.getPropertyValue("background-color");
+        if (bgColor) {
+            el.style.setProperty("background-color", bgColor);
+        }
 
-        // Check inline box-shadow
-        try {
-            const shadow = el.style.getPropertyValue("box-shadow");
-            if (shadow && unsupported.test(shadow)) {
-                el.style.setProperty("box-shadow", "none", "important");
-            }
-        } catch { /* skip */ }
+        // Handle box-shadow (remove if it has unsupported colors)
+        const shadow = computed.getPropertyValue("box-shadow");
+        if (shadow && /\b(lab|oklch|oklab|lch|color)\s*\(/i.test(shadow)) {
+            el.style.setProperty("box-shadow", "none");
+        } else if (shadow && shadow !== "none") {
+            el.style.setProperty("box-shadow", shadow);
+        }
     }
 }
 
@@ -82,7 +82,6 @@ export async function exportToPDF(cvData: CVData) {
         : "CV.pdf";
 
     try {
-        // Load libraries from CDN
         await Promise.all([
             loadScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"),
             loadScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"),
@@ -105,45 +104,41 @@ export async function exportToPDF(cvData: CVData) {
             return;
         }
 
-        // Clone the element — preserve ALL original styles (don't override colors)
+        // Clone the CV — preserves original template styling
         const clone = element.cloneNode(true) as HTMLElement;
 
-        // Remove UI-only overlays (page break lines, edit hints)
+        // Remove UI overlays
         clone.querySelectorAll(".hide-on-print").forEach(el => el.remove());
-
-        // Remove contenteditable attributes
         clone.querySelectorAll("[contenteditable]").forEach(el => {
             el.removeAttribute("contenteditable");
         });
 
-        // Position clone off-screen but keep same dimensions as the original
+        // Place clone off-screen with same dimensions
         clone.style.position = "absolute";
         clone.style.left = "-9999px";
         clone.style.top = "0";
         clone.style.width = element.offsetWidth + "px";
-        // Remove any box-shadow/border from the page container (UI chrome, not part of CV)
         clone.style.boxShadow = "none";
         clone.style.border = "none";
         clone.style.borderRadius = "0";
 
-        // Append to DOM so computed styles are available
         document.body.appendChild(clone);
 
-        // Only fix unsupported color functions — leave everything else as-is
-        sanitizeColors(clone);
+        // Force ALL computed colors as inline RGB — this is the key fix.
+        // html2canvas reads inline styles first, so it will never try to
+        // parse the stylesheet's lab() values.
+        forceComputedColors(clone);
 
         try {
-            // Render to canvas — exact pixel copy of what's on screen
             const canvas = await html2canvas(clone, {
                 scale: 2,
                 useCORS: true,
-                backgroundColor: null, // transparent — let the CV's own background show
+                backgroundColor: null,
                 logging: false,
             });
 
             const imgData = canvas.toDataURL("image/png");
 
-            // A4 in mm
             const A4_W = 210;
             const A4_H = 297;
             const pdfWidth = A4_W;
@@ -155,7 +150,6 @@ export async function exportToPDF(cvData: CVData) {
                 format: "a4",
             });
 
-            // Add pages as needed
             let yOffset = 0;
             pdf.addImage(imgData, "PNG", 0, yOffset, pdfWidth, pdfHeight);
 
