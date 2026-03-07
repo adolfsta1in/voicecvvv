@@ -20,68 +20,51 @@ function loadScript(src: string): Promise<void> {
 }
 
 /**
- * Sanitize all colors on an element tree so html2canvas can parse them.
- * Converts modern CSS color functions (lab, oklch, oklab, lch, color)
- * into standard rgb/rgba by reading the browser's computed styles.
+ * Sanitize unsupported CSS color functions (lab, oklch, oklab, lch, color)
+ * by replacing them with the browser's computed rgb/rgba values.
+ * This only touches colors that would crash html2canvas — everything else stays intact.
  */
 function sanitizeColors(root: HTMLElement) {
-    const colorProps = [
-        "color",
-        "backgroundColor",
-        "borderColor",
-        "borderTopColor",
-        "borderRightColor",
-        "borderBottomColor",
-        "borderLeftColor",
-        "outlineColor",
-        "textDecorationColor",
-        "boxShadow",
+    const unsupported = /\b(lab|oklch|oklab|lch|color)\s*\(/i;
+
+    const cssColorProps = [
+        "color", "background-color", "border-color",
+        "border-top-color", "border-right-color",
+        "border-bottom-color", "border-left-color",
+        "outline-color", "text-decoration-color",
     ];
 
-    const unsupportedPattern = /\b(lab|oklch|oklab|lch|color)\s*\(/i;
-
-    const allElements = root.querySelectorAll("*");
-    const elements = [root, ...Array.from(allElements)] as HTMLElement[];
+    const elements = [root, ...Array.from(root.querySelectorAll("*"))] as HTMLElement[];
 
     for (const el of elements) {
         const computed = window.getComputedStyle(el);
 
-        for (const prop of colorProps) {
+        for (const prop of cssColorProps) {
             try {
-                const inlineVal = el.style.getPropertyValue(
-                    prop.replace(/([A-Z])/g, "-$1").toLowerCase()
-                );
-                const computedVal = computed.getPropertyValue(
-                    prop.replace(/([A-Z])/g, "-$1").toLowerCase()
-                );
-
-                // If inline or computed style uses an unsupported color function,
-                // override with the computed RGB value (browser auto-converts)
-                if (
-                    unsupportedPattern.test(inlineVal) ||
-                    unsupportedPattern.test(computedVal)
-                ) {
-                    // The computed style from the browser is ALWAYS in rgb/rgba
-                    el.style.setProperty(
-                        prop.replace(/([A-Z])/g, "-$1").toLowerCase(),
-                        computedVal,
-                        "important"
-                    );
+                const val = el.style.getPropertyValue(prop);
+                if (val && unsupported.test(val)) {
+                    // Browser computed style is always rgb/rgba
+                    el.style.setProperty(prop, computed.getPropertyValue(prop), "important");
                 }
-            } catch {
-                // skip unreadable props
-            }
+            } catch { /* skip */ }
         }
 
-        // Also handle background shorthand and gradients
+        // Check inline background shorthand 
         try {
-            const bg = computed.getPropertyValue("background");
-            if (unsupportedPattern.test(bg)) {
-                el.style.setProperty("background", computed.getPropertyValue("background-color"), "important");
+            const bgInline = el.style.getPropertyValue("background");
+            if (bgInline && unsupported.test(bgInline)) {
+                const bgColor = computed.getPropertyValue("background-color");
+                el.style.setProperty("background", bgColor, "important");
             }
-        } catch {
-            // skip
-        }
+        } catch { /* skip */ }
+
+        // Check inline box-shadow
+        try {
+            const shadow = el.style.getPropertyValue("box-shadow");
+            if (shadow && unsupported.test(shadow)) {
+                el.style.setProperty("box-shadow", "none", "important");
+            }
+        } catch { /* skip */ }
     }
 }
 
@@ -122,39 +105,45 @@ export async function exportToPDF(cvData: CVData) {
             return;
         }
 
-        // Clone the element so we don't modify the real page
+        // Clone the element — preserve ALL original styles (don't override colors)
         const clone = element.cloneNode(true) as HTMLElement;
 
-        // Remove UI-only overlays
+        // Remove UI-only overlays (page break lines, edit hints)
         clone.querySelectorAll(".hide-on-print").forEach(el => el.remove());
 
-        // Force white background for the PDF
-        clone.style.background = "#ffffff";
-        clone.style.color = "#000000";
-        clone.style.boxShadow = "none";
-        clone.style.border = "none";
-        clone.style.borderRadius = "0";
-        clone.style.width = element.offsetWidth + "px";
+        // Remove contenteditable attributes
+        clone.querySelectorAll("[contenteditable]").forEach(el => {
+            el.removeAttribute("contenteditable");
+        });
+
+        // Position clone off-screen but keep same dimensions as the original
         clone.style.position = "absolute";
         clone.style.left = "-9999px";
         clone.style.top = "0";
+        clone.style.width = element.offsetWidth + "px";
+        // Remove any box-shadow/border from the page container (UI chrome, not part of CV)
+        clone.style.boxShadow = "none";
+        clone.style.border = "none";
+        clone.style.borderRadius = "0";
 
-        // Append to DOM so computed styles work
+        // Append to DOM so computed styles are available
         document.body.appendChild(clone);
 
-        // Convert any unsupported CSS color functions (lab, oklch, etc.) to RGB
+        // Only fix unsupported color functions — leave everything else as-is
         sanitizeColors(clone);
 
         try {
+            // Render to canvas — exact pixel copy of what's on screen
             const canvas = await html2canvas(clone, {
                 scale: 2,
                 useCORS: true,
-                backgroundColor: "#ffffff",
+                backgroundColor: null, // transparent — let the CV's own background show
                 logging: false,
             });
 
-            const imgData = canvas.toDataURL("image/jpeg", 0.95);
+            const imgData = canvas.toDataURL("image/png");
 
+            // A4 in mm
             const A4_W = 210;
             const A4_H = 297;
             const pdfWidth = A4_W;
@@ -166,20 +155,20 @@ export async function exportToPDF(cvData: CVData) {
                 format: "a4",
             });
 
+            // Add pages as needed
             let yOffset = 0;
-            pdf.addImage(imgData, "JPEG", 0, yOffset, pdfWidth, pdfHeight);
+            pdf.addImage(imgData, "PNG", 0, yOffset, pdfWidth, pdfHeight);
 
             let remaining = pdfHeight - A4_H;
             while (remaining > 0) {
                 yOffset -= A4_H;
                 pdf.addPage();
-                pdf.addImage(imgData, "JPEG", 0, yOffset, pdfWidth, pdfHeight);
+                pdf.addImage(imgData, "PNG", 0, yOffset, pdfWidth, pdfHeight);
                 remaining -= A4_H;
             }
 
             pdf.save(fileName);
         } finally {
-            // Always clean up the clone
             if (clone.parentNode) {
                 clone.parentNode.removeChild(clone);
             }
