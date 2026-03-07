@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 export default function PrivacyPolicy() {
     return (
@@ -39,6 +38,9 @@ export default function PrivacyPolicy() {
                     </p>
                     <p>
                         We securely store this information in your account so that you can revisit, edit, and export your CV at any time. We also collect basic account information such as your email address when you sign up.
+                    </p>
+                    <p>
+                        <strong>Payment Information:</strong> When you purchase a single CV or subscribe to the Pro Plan, your payment details are collected and processed directly by our secure payment provider (Lemon Squeezy). We do not store your full credit card numbers on our servers.
                     </p>
                 </section>
 

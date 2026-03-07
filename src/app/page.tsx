@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
@@ -62,6 +63,7 @@ export default function Home() {
           >
             How it works
           </a>
+          <ThemeToggle />
           <Link href="/app" className="btn-primary" style={{ padding: "10px 24px", textDecoration: "none" }}>
             Get Started
           </Link>
@@ -147,7 +149,7 @@ export default function Home() {
                 animation: "gradient-x 4s linear infinite",
               }}
             >
-              your better resume
+              your resume
             </span>
           </h1>
 
@@ -162,8 +164,8 @@ export default function Home() {
               animationDelay: "0.2s",
             }}
           >
-            Stop struggling with blank pages. Chat with our AI assistant to build from scratch,
-            or upload your existing CV to have AI rewrite and format it instantly.
+            Stop struggling with blank pages. Just have a conversation with our AI
+            assistant, and watch your professional CV build itself in real time.
           </p>
 
           <div
@@ -189,7 +191,7 @@ export default function Home() {
                 borderRadius: 14,
               }}
             >
-              Start Building — It&apos;s Free
+              Start Building Now
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s" }} className="group-hover:translate-x-1">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -513,8 +515,8 @@ export default function Home() {
             {
               step: "01",
               icon: "💬",
-              title: "Start or Upload",
-              desc: "Chat naturally with our AI to build from scratch, or drop in your existing PDF resume.",
+              title: "Tell Your Story",
+              desc: "Chat naturally with our AI. It asks thoughtful questions about your career, experience, and achievements.",
             },
             {
               step: "02",
@@ -705,10 +707,6 @@ export default function Home() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {[
             {
-              q: "Is it really free to use?",
-              a: "Yes! Creating your resume, chatting with our AI, and exporting to PDF is completely free."
-            },
-            {
               q: "How does the AI builder work?",
               a: "It acts like an expert career coach. You tell it your experiences in plain English (or any language), and it writes professional, metric-driven bullet points for you."
             },
@@ -806,7 +804,7 @@ export default function Home() {
                 boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
               }}
             >
-              Start Now — Free
+              Start Now
               <svg
                 width="16"
                 height="16"

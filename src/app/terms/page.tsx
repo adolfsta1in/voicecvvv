@@ -71,6 +71,20 @@ export default function TermsOfService() {
                 </section>
 
                 <section style={{ marginBottom: 40 }} className="chat-markdown">
+                    <h3>5. Pricing and Payments</h3>
+                    <p>
+                        Creating your CV is free, but exporting or downloading the final PDF requires payment. We offer two options:
+                    </p>
+                    <ul>
+                        <li><strong>Single CV:</strong> A one-time payment of $4.99 for a single resume download.</li>
+                        <li><strong>Pro Plan:</strong> A monthly subscription of $9.99 allowing up to 10 resume downloads per month.</li>
+                    </ul>
+                    <p>
+                        All payments are processed securely via Lemon Squeezy, our merchant of record. By completing a purchase, you also agree to Lemon Squeezy's terms and conditions.
+                    </p>
+                </section>
+
+                <section style={{ marginBottom: 40 }} className="chat-markdown">
                     <h3>Contact Us</h3>
                     <p>
                         If you have any questions about these Terms, please contact us at <a href="mailto:support@voicecv.app" style={{ color: "var(--color-primary)" }}>support@voicecv.app</a>.

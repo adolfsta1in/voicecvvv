@@ -33,6 +33,9 @@ export default function AccountPage() {
     const [renameValue, setRenameValue] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
+    // MOCK: Replace with actual database check
+    const isPro = true;
+
     useEffect(() => {
         async function load() {
             const supabase = createClient();
@@ -122,6 +125,31 @@ export default function AccountPage() {
                 </Link>
 
                 <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                    {isPro && (
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+                                border: "1px solid #fcd34d",
+                                color: "#b45309",
+                                padding: "4px 10px",
+                                borderRadius: "100px",
+                                fontSize: "0.75rem",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em",
+                                boxShadow: "0 2px 8px rgba(245, 158, 11, 0.15)",
+                            }}
+                            title="Pro Subscriber"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
+                            </svg>
+                            PRO
+                        </div>
+                    )}
                     <Link
                         href="/app"
                         style={{

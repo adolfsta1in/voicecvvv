@@ -3,35 +3,36 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-primary-dark: #4f46e5;
+  --color-primary: #171717;
+  /* Neutral almost-black */
+  --color-primary-light: #404040;
+  --color-primary-dark: #0a0a0a;
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
   --color-border: var(--border-color);
   --color-muted: var(--muted);
-  --color-accent: #f59e0b;
+  --color-accent: #3b82f6;
+  /* Subtle blue accent if needed */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --surface: #f8fafc;
-  --surface-hover: #f1f5f9;
-  --border-color: #e2e8f0;
-  --muted: #94a3b8;
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --surface: #ffffff;
+  --surface-hover: #f4f4f5;
+  --border-color: #e4e4e7;
+  --muted: #71717a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b0f1a;
-    --foreground: #e2e8f0;
-    --surface: #131927;
-    --surface-hover: #1c2438;
-    --border-color: #1e293b;
-    --muted: #64748b;
-  }
+.dark,
+[data-theme="dark"] {
+  --background: #0b0f1a;
+  --foreground: #e2e8f0;
+  --surface: #131927;
+  --surface-hover: #1c2438;
+  --border-color: #1e293b;
+  --muted: #64748b;
 }
 
 * {
