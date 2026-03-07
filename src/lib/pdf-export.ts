@@ -1,49 +1,41 @@
 "use client";
 
 import { CVData } from "./cv-types";
+// @ts-ignore - html2pdf doesn't have good type definitions out of the box
+import html2pdf from "html2pdf.js";
 
 export async function exportToPDF(cvData: CVData) {
     if (typeof window === "undefined") return;
 
     try {
-        // We capture the entire document HTML so stylesheets are included
-        const html = document.documentElement.outerHTML;
-        const origin = window.location.origin;
-
-        const response = await fetch('/api/pdf', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ html, origin }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`PDF generation failed: ${response.statusText}`);
+        // The container holding the CV in the UI
+        const element = document.getElementById("cv-preview-content");
+        if (!element) {
+            throw new Error("Could not find CV content container");
         }
 
-        const blob = await response.blob();
-
-        // Create an invisible <a> tag to trigger the automatic file download
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
+        // Add a temporary class to fix some styles during PDF generation if needed
+        element.classList.add("exporting-pdf");
 
         const fileName = cvData.personalInfo?.fullName
             ? `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`
             : "CV.pdf";
 
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
+        const opt = {
+            margin: 0,
+            filename: fileName,
+            image: { type: 'jpeg' as const, quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const }
+        };
+
+        await html2pdf().set(opt).from(element).save();
 
         // Cleanup
-        setTimeout(() => {
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }, 100);
+        element.classList.remove("exporting-pdf");
 
     } catch (error) {
-        console.error("Error exporting PDF via server API:", error);
+        console.error("Error exporting PDF via html2pdf:", error);
         alert("Failed to generate PDF. Please try again.");
     }
 }
