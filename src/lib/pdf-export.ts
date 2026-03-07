@@ -6,39 +6,53 @@ export async function exportToPDF(cvData: CVData) {
     if (typeof window === "undefined") return;
 
     try {
-        // Dynamically import html2pdf to avoid SSR issues during build
-        // @ts-ignore
-        const html2pdfModule = await import("html2pdf.js");
-        const html2pdf: any = html2pdfModule.default ? html2pdfModule.default : html2pdfModule;
+        // Dynamically import html2pdf to avoid SSR issues
+        const html2pdf = (await import("html2pdf.js")).default;
 
-        // The container holding the CV in the UI
         const element = document.getElementById("cv-preview-content");
         if (!element) {
-            throw new Error("Could not find CV content container");
+            alert("No CV content found. Please make sure your CV has some content before exporting.");
+            return;
         }
-
-        // Add a temporary class to fix some styles during PDF generation if needed
-        element.classList.add("exporting-pdf");
 
         const fileName = cvData.personalInfo?.fullName
             ? `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`
             : "CV.pdf";
 
+        // Clone the element so we can style it for PDF without affecting the page
+        const clone = element.cloneNode(true) as HTMLElement;
+
+        // Remove any UI overlays (page break indicators, edit hints etc.)
+        clone.querySelectorAll(".hide-on-print").forEach(el => el.remove());
+
+        // Force white background and black text for the PDF
+        clone.style.background = "#ffffff";
+        clone.style.color = "#000000";
+        clone.style.boxShadow = "none";
+        clone.style.border = "none";
+        clone.style.borderRadius = "0";
+
         const opt = {
             margin: 0,
             filename: fileName,
-            image: { type: 'jpeg' as const, quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' as const }
+            image: { type: "jpeg" as const, quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                letterRendering: true,
+                backgroundColor: "#ffffff",
+            },
+            jsPDF: {
+                unit: "mm",
+                format: "a4",
+                orientation: "portrait" as const,
+            },
         };
 
-        await html2pdf().set(opt).from(element).save();
-
-        // Cleanup
-        element.classList.remove("exporting-pdf");
+        await html2pdf().set(opt).from(clone).save();
 
     } catch (error) {
-        console.error("Error exporting PDF via html2pdf:", error);
+        console.error("Error exporting PDF:", error);
         alert("Failed to generate PDF. Please try again.");
     }
 }
