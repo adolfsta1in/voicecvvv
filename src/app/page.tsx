@@ -109,7 +109,7 @@ export default function Home() {
               border: "1px solid var(--border-color)",
               borderRadius: 100,
               fontSize: "0.8125rem",
-              color: "var(--color-primary)",
+              color: "var(--foreground)",
               fontWeight: 600,
               marginBottom: 32,
               boxShadow: "0 2px 8px rgba(0,0,0,0.02)",

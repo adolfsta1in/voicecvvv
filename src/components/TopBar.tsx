@@ -35,7 +35,7 @@ export default function TopBar() {
 
     const handleExportClick = () => {
         // Mocking user having 0 credits and no subscription out of the box.
-        const hasCredits = false;
+        const hasCredits = true; // TEMPORARILY SET TO TRUE FOR TESTING
         const hasSubscription = false;
 
         if (!hasCredits && !hasSubscription) {
