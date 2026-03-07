@@ -2,6 +2,24 @@
 
 import { CVData } from "./cv-types";
 
+/**
+ * Loads a script from a CDN URL and returns a promise that resolves when loaded.
+ */
+function loadScript(src: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if (document.querySelector(`script[src="${src}"]`)) {
+            resolve();
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
 export async function exportToPDF(cvData: CVData) {
     if (typeof window === "undefined") return;
 
@@ -12,64 +30,74 @@ export async function exportToPDF(cvData: CVData) {
     }
 
     const fileName = cvData.personalInfo?.fullName
-        ? `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`
+        ? `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`
         : "CV.pdf";
 
     try {
-        const html2canvas = (await import("html2canvas")).default;
-        const { jsPDF } = await import("jspdf");
+        // Load libraries from CDN — this bypasses all bundler/Turbopack issues
+        await Promise.all([
+            loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
+            loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"),
+        ]);
 
-        // A4 dimensions in mm
-        const A4_WIDTH_MM = 210;
-        const A4_HEIGHT_MM = 297;
+        // Access the globally loaded libraries
+        const html2canvas = (window as unknown as Record<string, unknown>).html2canvas as (
+            el: HTMLElement,
+            opts: Record<string, unknown>
+        ) => Promise<HTMLCanvasElement>;
 
-        // Render the element to a canvas
+        const jsPDFConstructor = ((window as unknown as Record<string, unknown>).jspdf as Record<string, unknown>)
+            .jsPDF as new (opts: Record<string, unknown>) => {
+                addImage: (data: string, type: string, x: number, y: number, w: number, h: number) => void;
+                addPage: () => void;
+                save: (name: string) => void;
+            };
+
+        if (!html2canvas || !jsPDFConstructor) {
+            alert("PDF libraries failed to load. Please check your internet connection and try again.");
+            return;
+        }
+
+        // Render the CV element to a high-res canvas
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
             backgroundColor: "#ffffff",
             logging: false,
-            // Ignore UI-only elements
-            ignoreElements: (el) => el.classList?.contains("hide-on-print"),
+            ignoreElements: (el: Element) => el.classList?.contains("hide-on-print"),
         });
 
         const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-        // Calculate how many A4 pages we need
-        const imgWidthPx = canvas.width;
-        const imgHeightPx = canvas.height;
+        // A4 dimensions in mm
+        const A4_W = 210;
+        const A4_H = 297;
 
-        // Scale: fit the image width to A4 width
-        const pdfWidth = A4_WIDTH_MM;
-        const pdfHeight = (imgHeightPx * pdfWidth) / imgWidthPx;
+        const pdfWidth = A4_W;
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-        const pdf = new jsPDF({
+        const pdf = new jsPDFConstructor({
             orientation: "portrait",
             unit: "mm",
             format: "a4",
         });
 
-        // If the content is taller than one page, split across pages
-        let remainingHeight = pdfHeight;
-        let position = 0;
+        // Add pages as needed
+        let yOffset = 0;
+        pdf.addImage(imgData, "JPEG", 0, yOffset, pdfWidth, pdfHeight);
 
-        // First page
-        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-        remainingHeight -= A4_HEIGHT_MM;
-
-        // Add more pages if content overflows
-        while (remainingHeight > 0) {
-            position -= A4_HEIGHT_MM;
+        let remaining = pdfHeight - A4_H;
+        while (remaining > 0) {
+            yOffset -= A4_H;
             pdf.addPage();
-            pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-            remainingHeight -= A4_HEIGHT_MM;
+            pdf.addImage(imgData, "JPEG", 0, yOffset, pdfWidth, pdfHeight);
+            remaining -= A4_H;
         }
 
-        // Trigger instant download
+        // Trigger the download
         pdf.save(fileName);
-
     } catch (error) {
-        console.error("Error exporting PDF:", error);
-        alert("Failed to generate PDF. Please try again.");
+        console.error("PDF export error:", error);
+        alert("Failed to generate PDF: " + (error instanceof Error ? error.message : String(error)));
     }
 }
