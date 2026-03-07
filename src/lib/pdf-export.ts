@@ -36,8 +36,8 @@ export async function exportToPDF(cvData: CVData) {
     try {
         // Load libraries from CDN — this bypasses all bundler/Turbopack issues
         await Promise.all([
-            loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"),
-            loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"),
+            loadScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"),
+            loadScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"),
         ]);
 
         // Access the globally loaded libraries
