@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import chromium from "@sparticuz/chromium-min";
+
+export const maxDuration = 60;
 
 const IS_LOCAL = process.env.NODE_ENV === "development";
 
@@ -36,7 +38,9 @@ export async function POST(req: NextRequest) {
         // Vercel Serverless Chromium config
         const executablePath = IS_LOCAL
             ? localExecutablePath
-            : await chromium.executablePath();
+            : await chromium.executablePath(
+                "https://github.com/Sparticuz/chromium/releases/download/v133.0.0/chromium-v133.0.0-pack.tar"
+            );
 
         browser = await puppeteer.launch({
             args: IS_LOCAL ? [] : [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
