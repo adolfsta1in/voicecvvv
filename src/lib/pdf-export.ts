@@ -5,6 +5,11 @@ import { CVData } from "./cv-types";
 // Keep track of ongoing export to prevent multiple clicks
 let isExporting = false;
 
+/**
+ * Exports the CV preview to PDF using the browser's native print functionality.
+ * This produces a pixel-perfect PDF that matches exactly what the user sees on screen.
+ * No server-side rendering needed — works everywhere including Vercel.
+ */
 export async function exportToPDF(cvData: CVData) {
     if (typeof window === "undefined" || isExporting) return;
 
@@ -17,54 +22,138 @@ export async function exportToPDF(cvData: CVData) {
     try {
         isExporting = true;
 
-        // Let the user know it's starting (this could be a toast in a fuller implementation)
-        console.log("Starting secure server-side PDF generation...");
+        // Create a hidden iframe to isolate the print context
+        const iframe = document.createElement("iframe");
+        iframe.style.position = "fixed";
+        iframe.style.top = "-10000px";
+        iframe.style.left = "-10000px";
+        iframe.style.width = "210mm";
+        iframe.style.height = "297mm";
+        iframe.style.border = "none";
+        document.body.appendChild(iframe);
 
-        // Grab current theme to ensure the PDF renders in the same mode (light/dark)
-        const isDarkMode = document.documentElement.classList.contains("dark");
-        const theme = isDarkMode ? "dark" : "light";
-
-        // Calculate current zoom level of the CV preview if needed,
-        // but for a 1:1 server render, we usually just want to render at scale 1.
-
-        const response = await fetch("/api/export-pdf", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                cvData,
-                zoom: 1,
-                theme
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || "Failed to generate PDF on the server.");
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframeDoc) {
+            throw new Error("Could not access iframe document");
         }
 
-        // The response is a binary PDF Blob
-        const blob = await response.blob();
+        // Copy all stylesheets from the parent document
+        const styleSheets = Array.from(document.styleSheets);
+        let cssText = "";
+        for (const sheet of styleSheets) {
+            try {
+                const rules = Array.from(sheet.cssRules || []);
+                for (const rule of rules) {
+                    cssText += rule.cssText + "\n";
+                }
+            } catch {
+                // Cross-origin stylesheets can't be read - fetch them via link tags instead
+                if (sheet.href) {
+                    const link = iframeDoc.createElement("link");
+                    link.rel = "stylesheet";
+                    link.href = sheet.href;
+                    iframeDoc.head.appendChild(link);
+                }
+            }
+        }
 
-        // Create an invisible anchor tag to trigger the browser download
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
+        // Also copy CSS custom properties from :root / html / body
+        const computedRoot = getComputedStyle(document.documentElement);
+        let cssVars = ":root {\n";
+        for (let i = 0; i < computedRoot.length; i++) {
+            const prop = computedRoot[i];
+            if (prop.startsWith("--")) {
+                cssVars += `  ${prop}: ${computedRoot.getPropertyValue(prop)};\n`;
+            }
+        }
+        cssVars += "}\n";
 
-        const fileName = cvData.personalInfo?.fullName
-            ? `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`
-            : "CV.pdf";
+        // Copy Google Fonts links
+        const fontLinks = document.querySelectorAll('link[href*="fonts.googleapis.com"], link[href*="fonts.gstatic.com"]');
+        fontLinks.forEach((link) => {
+            const clone = link.cloneNode(true) as HTMLLinkElement;
+            iframeDoc.head.appendChild(clone);
+        });
 
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
+        // Write the print document
+        iframeDoc.open();
+        iframeDoc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8" />
+                <style>
+                    ${cssVars}
+                    ${cssText}
 
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+                    @page {
+                        size: A4;
+                        margin: 0;
+                    }
 
-        console.log("PDF downloaded successfully!");
+                    *, *::before, *::after {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                    }
+
+                    html, body {
+                        margin: 0;
+                        padding: 0;
+                        width: 210mm;
+                        background: white;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+
+                    /* Hide any scrollbars */
+                    body::-webkit-scrollbar { display: none; }
+
+                    /* Ensure editable fields lose their interactive styling */
+                    .editable-field {
+                        cursor: default !important;
+                    }
+                    .editable-field:hover {
+                        background: transparent !important;
+                    }
+
+                    /* Hide drag handles */
+                    [data-drag-handle] {
+                        display: none !important;
+                    }
+                </style>
+            </head>
+            <body>
+                ${element.innerHTML}
+            </body>
+            </html>
+        `);
+        iframeDoc.close();
+
+        // Wait for fonts and images to load
+        await new Promise<void>((resolve) => {
+            iframe.onload = () => resolve();
+            // Fallback timeout in case onload doesn't fire
+            setTimeout(resolve, 2000);
+        });
+
+        // Extra wait for fonts to render
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Trigger print on the iframe
+        const iframeWindow = iframe.contentWindow;
+        if (!iframeWindow) {
+            throw new Error("Could not access iframe window");
+        }
+
+        // Print the iframe content
+        iframeWindow.focus();
+        iframeWindow.print();
+
+        // Cleanup after a delay to let the print dialog process
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 1000);
 
     } catch (error) {
         console.error("PDF export error:", error);
