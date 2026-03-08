@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getUserCVs, deleteCV, renameCV, CVDbRecord } from "@/lib/cv-api";
+import { exportToPDF } from "@/lib/pdf-export";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
@@ -535,23 +536,30 @@ export default function AccountPage() {
                                             Open
                                         </Link>
                                         <button
+                                            onClick={() => exportToPDF(cv.content, (cv.content?.templateId as any) || "classic")}
                                             style={{
                                                 flex: 1,
                                                 padding: "8px 0",
                                                 borderRadius: 9,
                                                 border: "1px solid var(--border-color)",
                                                 background: "none",
-                                                color: "var(--muted)",
+                                                color: "var(--foreground)",
                                                 fontSize: "0.8125rem",
                                                 fontWeight: 600,
-                                                cursor: "default",
+                                                cursor: "pointer",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
                                                 gap: 5,
-                                                opacity: 0.5,
+                                                transition: "background 0.15s",
                                             }}
-                                            title="Export coming soon"
+                                            onMouseEnter={(e) =>
+                                            ((e.currentTarget as HTMLButtonElement).style.background =
+                                                "var(--surface)")
+                                            }
+                                            onMouseLeave={(e) =>
+                                                ((e.currentTarget as HTMLButtonElement).style.background = "none")
+                                            }
                                         >
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

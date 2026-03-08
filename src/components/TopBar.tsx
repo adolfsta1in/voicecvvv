@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useCVStore } from "@/lib/cv-store";
+import { exportToPDF } from "@/lib/pdf-export";
 import { saveCV } from "@/lib/cv-api";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -16,6 +17,18 @@ export default function TopBar() {
     const cvId = state.cvId;
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "autosaving" | "autosaved" | "error">("idle");
     const [showPricing, setShowPricing] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+
+    React.useEffect(() => {
+        const start = () => setIsExporting(true);
+        const end = () => setIsExporting(false);
+        window.addEventListener("pdf-export-start", start);
+        window.addEventListener("pdf-export-end", end);
+        return () => {
+            window.removeEventListener("pdf-export-start", start);
+            window.removeEventListener("pdf-export-end", end);
+        };
+    }, []);
 
     // MOCK: Replace with actual database check
     const isPro = true;
@@ -31,6 +44,22 @@ export default function TopBar() {
     ];
     const filled = sections.filter(Boolean).length;
     const progress = Math.round((filled / sections.length) * 100);
+
+    const handleExportClick = () => {
+        // Mocking user having 0 credits and no subscription out of the box.
+        const hasCredits = true; // TEMPORARILY SET TO TRUE FOR TESTING
+        const hasSubscription = false;
+
+        if (!hasCredits && !hasSubscription) {
+            setShowPricing(true);
+        } else {
+            handleExport();
+        }
+    };
+
+    const handleExport = async () => {
+        await exportToPDF(cv, templateId);
+    };
 
 
 
@@ -256,6 +285,8 @@ export default function TopBar() {
                     Log Out
                 </button>
                 <button
+                    onClick={handleExportClick}
+                    disabled={!cv.personalInfo.fullName || isExporting}
                     className="btn-primary"
                     style={{
                         padding: "8px 20px",
@@ -263,10 +294,9 @@ export default function TopBar() {
                         display: "flex",
                         alignItems: "center",
                         gap: 6,
-                        opacity: 0.6,
-                        cursor: "default",
+                        opacity: cv.personalInfo.fullName && !isExporting ? 1 : 0.5,
+                        cursor: isExporting ? "wait" : "pointer"
                     }}
-                    title="Export coming soon"
                 >
                     <svg
                         width="14"
@@ -282,7 +312,7 @@ export default function TopBar() {
                         <polyline points="7 10 12 15 17 10" />
                         <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    Download CV
+                    {isExporting ? "Generating PDF..." : "Download CV"}
                 </button>
             </div>
 
