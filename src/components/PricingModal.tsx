@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import React from "react";
 
@@ -175,7 +175,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                         <button
                             className="btn-primary"
                             style={{ width: "100%", padding: "14px", fontSize: "1rem" }}
-                            onClick={() => alert("Lemon Squeezy subscription will open here.")}
+                            onClick={() => window.open("https://voicecvai.lemonsqueezy.com/checkout/buy/a5ba9fec-f920-4087-b5f6-c9896fa9ce99?discount=0", "_blank")}
                         >
                             Subscribe Now
                         </button>
