@@ -17,6 +17,18 @@ export default function TopBar() {
     const cvId = state.cvId;
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "autosaving" | "autosaved" | "error">("idle");
     const [showPricing, setShowPricing] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+
+    React.useEffect(() => {
+        const start = () => setIsExporting(true);
+        const end = () => setIsExporting(false);
+        window.addEventListener("pdf-export-start", start);
+        window.addEventListener("pdf-export-end", end);
+        return () => {
+            window.removeEventListener("pdf-export-start", start);
+            window.removeEventListener("pdf-export-end", end);
+        };
+    }, []);
 
     // MOCK: Replace with actual database check
     const isPro = true;
@@ -46,7 +58,7 @@ export default function TopBar() {
     };
 
     const handleExport = async () => {
-        await exportToPDF(cv);
+        await exportToPDF(cv, templateId);
     };
 
     const handleSave = React.useCallback(async (isAuto = false) => {
@@ -272,7 +284,7 @@ export default function TopBar() {
                 </button>
                 <button
                     onClick={handleExportClick}
-                    disabled={!cv.personalInfo.fullName}
+                    disabled={!cv.personalInfo.fullName || isExporting}
                     className="btn-primary"
                     style={{
                         padding: "8px 20px",
@@ -280,7 +292,8 @@ export default function TopBar() {
                         display: "flex",
                         alignItems: "center",
                         gap: 6,
-                        opacity: cv.personalInfo.fullName ? 1 : 0.5,
+                        opacity: cv.personalInfo.fullName && !isExporting ? 1 : 0.5,
+                        cursor: isExporting ? "wait" : "pointer"
                     }}
                 >
                     <svg
@@ -297,7 +310,7 @@ export default function TopBar() {
                         <polyline points="7 10 12 15 17 10" />
                         <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    Export PDF
+                    {isExporting ? "Generating PDF..." : "Export PDF"}
                 </button>
             </div>
 
