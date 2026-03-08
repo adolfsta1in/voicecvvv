@@ -14,6 +14,7 @@ import ModernTemplate from "@/components/templates/ModernTemplate";
 import ProfessionalTemplate from "@/components/templates/ProfessionalTemplate";
 import ElegantTemplate from "@/components/templates/ElegantTemplate";
 import TechTemplate from "@/components/templates/TechTemplate";
+import { CVProvider } from "@/lib/cv-store";
 
 export default function RenderClient({ cvData, templateId }: { cvData: CVData, templateId: TemplateId }) {
     const layoutInfo = cvData.layout || {};
@@ -44,48 +45,50 @@ export default function RenderClient({ cvData, templateId }: { cvData: CVData, t
     }
 
     return (
-        <div style={{ background: "white", minHeight: "100vh" }}>
-            <style>{`
-                /* Base typography to match builder */
-                body {
-                    margin: 0;
-                    padding: 0;
-                    background: white !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }
-                
-                #cv-render-content {
-                    font-size: ${fontScale} !important;
-                }
-                #cv-render-content * {
-                    line-height: calc(1.6 * ${spaceScale}) !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                    color-adjust: exact !important;
-                }
-                
-                /* Hide any interactive elements */
-                .editable-field { cursor: default !important; }
-                .editable-field:hover { background: transparent !important; }
-                [data-drag-handle] { display: none !important; }
-            `}</style>
+        <CVProvider>
+            <div style={{ background: "white", minHeight: "100vh" }}>
+                <style>{`
+                    /* Base typography to match builder */
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    
+                    #cv-render-content {
+                        font-size: ${fontScale} !important;
+                    }
+                    #cv-render-content * {
+                        line-height: calc(1.6 * ${spaceScale}) !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                    }
+                    
+                    /* Hide any interactive elements */
+                    .editable-field { cursor: default !important; }
+                    .editable-field:hover { background: transparent !important; }
+                    [data-drag-handle] { display: none !important; }
+                `}</style>
 
-            <div
-                id="cv-render-content"
-                className="cv-document"
-                style={{
-                    width: "210mm",
-                    minHeight: "297mm",
-                    padding: templateId === "sidebar" || templateId === "executive" || templateId === "creative" ? 0 : "48px 56px",
-                    margin: "0 auto", // Center if viewed in browser, ignored in print
-                    boxSizing: "border-box",
-                    position: "relative",
-                    overflow: "hidden", // clip any bleeds
-                }}
-            >
-                {TemplateComponent}
+                <div
+                    id="cv-render-content"
+                    className="cv-document"
+                    style={{
+                        width: "210mm",
+                        minHeight: "297mm",
+                        padding: templateId === "sidebar" || templateId === "executive" || templateId === "creative" ? 0 : "48px 56px",
+                        margin: "0 auto", // Center if viewed in browser, ignored in print
+                        boxSizing: "border-box",
+                        position: "relative",
+                        overflow: "hidden", // clip any bleeds
+                    }}
+                >
+                    {TemplateComponent}
+                </div>
             </div>
-        </div>
+        </CVProvider>
     );
 }
