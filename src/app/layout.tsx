@@ -3,9 +3,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VoiceCV — Build Your Resume Through Conversation",
+  title: "AI Resume Builder – Create a CV by Chatting with AI | ChatCV",
   description:
-    "Create a professional CV by simply talking to an AI assistant. No forms, no templates — just tell your story and watch your resume build itself.",
+    "Create a professional resume with AI in minutes. ChatCV is an AI resume builder that writes your CV as you chat and lets you download it instantly.",
 };
 
 export default function RootLayout({

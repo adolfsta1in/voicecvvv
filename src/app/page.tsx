@@ -37,7 +37,7 @@ export default function Home() {
           >
             V
           </div>
-          <span style={{ fontWeight: 800, fontSize: "1.125rem" }}>VoiceCV</span>
+          <span style={{ fontWeight: 800, fontSize: "1.125rem" }}>ChatCV</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
           <a
@@ -62,6 +62,17 @@ export default function Home() {
             }}
           >
             How it works
+          </a>
+          <a
+            href="#faq"
+            style={{
+              color: "var(--muted)",
+              textDecoration: "none",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+            }}
+          >
+            FAQ
           </a>
           <ThemeToggle />
           <Link href="/app" className="btn-primary" style={{ padding: "10px 24px", textDecoration: "none" }}>
@@ -138,7 +149,7 @@ export default function Home() {
               letterSpacing: "-0.03em",
             }}
           >
-            Your story becomes
+            AI Resume Builder That
             <br />
             <span
               style={{
@@ -149,7 +160,7 @@ export default function Home() {
                 animation: "gradient-x 4s linear infinite",
               }}
             >
-              your resume
+              Writes Your CV For You
             </span>
           </h1>
 
@@ -164,8 +175,7 @@ export default function Home() {
               animationDelay: "0.2s",
             }}
           >
-            Stop struggling with blank pages. Just have a conversation with our AI
-            assistant, and watch your professional CV build itself in real time.
+            Create a professional resume by simply chatting with AI. ChatCV asks smart questions about your experience and instantly builds a polished CV ready to download.
           </p>
 
           <div
@@ -191,7 +201,7 @@ export default function Home() {
                 borderRadius: 14,
               }}
             >
-              Start Building Now
+              Create My Resume
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s" }} className="group-hover:translate-x-1">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -299,7 +309,7 @@ export default function Home() {
                 color: "var(--muted)",
               }}
             >
-              voicecv.app
+              chatcv.app
             </div>
           </div>
           {/* App content */}
@@ -515,20 +525,20 @@ export default function Home() {
             {
               step: "01",
               icon: "💬",
-              title: "Tell Your Story",
-              desc: "Chat naturally with our AI. It asks thoughtful questions about your career, experience, and achievements.",
+              title: "Tell the AI about your experience",
+              desc: "Explain your career, education, and skills through a simple chat conversation.",
             },
             {
               step: "02",
               icon: "✨",
-              title: "AI Builds Your CV",
-              desc: "Watch as your answers transform into polished, professional resume sections in real time.",
+              title: "AI builds your resume",
+              desc: "Our AI transforms your answers into structured resume sections in real time.",
             },
             {
               step: "03",
               icon: "📄",
-              title: "Export & Apply",
-              desc: "Download your finished CV as a clean PDF, ready to send to employers.",
+              title: "Download your CV",
+              desc: "Export your finished resume as a clean professional PDF ready to send to employers.",
             },
           ].map((item, i) => (
             <div
@@ -603,7 +613,7 @@ export default function Home() {
             letterSpacing: "-0.02em",
           }}
         >
-          Why VoiceCV?
+          Why ChatCV?
         </h2>
         <p
           style={{
@@ -626,22 +636,22 @@ export default function Home() {
             {
               icon: "🎯",
               title: "Smart Follow-ups",
-              desc: "The AI identifies weak descriptions and asks targeted questions to strengthen your experience bullets.",
+              desc: "Our AI resume builder identifies weak descriptions and asks targeted questions to strengthen your experience bullets.",
             },
             {
               icon: "⚡",
               title: "Real-time Preview",
-              desc: "See your CV update live as you chat. Every answer instantly shapes your professional document.",
+              desc: "Create resume with AI and see your CV update live as you chat. Every answer instantly shapes your document.",
             },
             {
               icon: "🧠",
               title: "Career Coach AI",
-              desc: "Powered by advanced AI that understands career advancement and knows what recruiters look for.",
+              desc: "Our professional CV generator is powered by advanced AI that understands career advancement and knows what recruiters look for.",
             },
             {
               icon: "📥",
               title: "One-click Export",
-              desc: "Download your polished CV as a beautifully formatted PDF, ready to submit immediately.",
+              desc: "Download your polished CV as a beautifully formatted PDF from our AI resume builder, ready to submit immediately.",
             },
           ].map((item, i) => (
             <div
@@ -684,6 +694,7 @@ export default function Home() {
 
       {/* FAQ Section */}
       <section
+        id="faq"
         style={{
           maxWidth: 800,
           margin: "0 auto",
@@ -701,22 +712,30 @@ export default function Home() {
           >
             Frequently Asked Questions
           </h2>
-          <p style={{ color: "var(--muted)" }}>Everything you need to know about VoiceCV.</p>
+          <p style={{ color: "var(--muted)" }}>Everything you need to know about ChatCV.</p>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {[
             {
-              q: "How does the AI builder work?",
-              a: "It acts like an expert career coach. You tell it your experiences in plain English (or any language), and it writes professional, metric-driven bullet points for you."
+              q: "What is an AI resume builder?",
+              a: "An AI resume builder is a tool that uses artificial intelligence to help you write and format your CV. Instead of starting from scratch, you simply chat with the AI about your background, and it generates professional, metric-driven bullet points for you."
             },
             {
-              q: "Can I customize the design later?",
-              a: "Absolutely. Once the AI generates the content, you can switch between multiple premium layouts, change fonts, and adjust spacing in our visual editor."
+              q: "How does ChatCV create a resume?",
+              a: "ChatCV works like an expert career coach. You tell our AI about your experience in plain English, and it instantly transforms your conversation into a perfectly formatted, professional resume."
             },
             {
-              q: "Is my data private?",
-              a: "We take privacy seriously. We don't sell your data to recruiters, and you can easily delete your account and all associated CVs at any time."
+              q: "Is ChatCV free to use?",
+              a: "We offer both free and premium options. You can start creating your resume with AI for free, and upgrade if you need more advanced design features or multiple downloads."
+            },
+            {
+              q: "Can I download my resume as a PDF?",
+              a: "Yes! Once you create resume with AI using ChatCV, you can instantly download your finished CV as a clean, professionally formatted PDF ready to send to employers."
+            },
+            {
+              q: "Is ChatCV better than resume templates?",
+              a: "Yes. While traditional templates only give you a design, our professional CV generator actually writes the content for you. It ensures your experience is highlighted perfectly without the struggle of staring at a blank page."
             }
           ].map((faq, i) => (
             <div
@@ -737,6 +756,36 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* About */}
+      <section
+        style={{
+          maxWidth: 800,
+          margin: "0 auto",
+          padding: "40px 24px 80px",
+          textAlign: "center",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "2rem",
+            fontWeight: 800,
+            marginBottom: 24,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          About ChatCV
+        </h2>
+        <p
+          style={{
+            fontSize: "1.125rem",
+            color: "var(--muted)",
+            lineHeight: 1.6,
+          }}
+        >
+          ChatCV is an AI resume builder that helps people create professional resumes by chatting with AI instead of filling out forms.
+        </p>
       </section>
 
       {/* CTA */}
@@ -804,7 +853,7 @@ export default function Home() {
                 boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
               }}
             >
-              Start Now
+              Create My Resume
               <svg
                 width="16"
                 height="16"
@@ -837,7 +886,7 @@ export default function Home() {
           fontSize: "0.875rem",
         }}
       >
-        <div>© {new Date().getFullYear()} VoiceCV. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} ChatCV. All rights reserved.</div>
         <div style={{ display: "flex", gap: 24 }}>
           <Link href="/privacy" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Privacy
@@ -845,7 +894,7 @@ export default function Home() {
           <Link href="/terms" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Terms
           </Link>
-          <a href="mailto:support@voicecv.app" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
+          <a href="mailto:support@chatcv.app" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Contact
           </a>
         </div>

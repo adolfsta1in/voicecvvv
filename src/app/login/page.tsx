@@ -9,6 +9,14 @@ function LoginContent() {
     const [isLogin, setIsLogin] = useState(true);
     const searchParams = useSearchParams();
     const error = searchParams.get("error");
+    const from = searchParams.get("from");
+
+    // Auto-select signup if coming from export
+    useState(() => {
+        if (from === "export") {
+            setIsLogin(false);
+        }
+    });
 
     return (
         <div
@@ -52,9 +60,11 @@ function LoginContent() {
                         {isLogin ? "Welcome back" : "Create your account"}
                     </h1>
                     <p style={{ color: "var(--muted)", margin: 0, fontSize: "0.9375rem" }}>
-                        {isLogin
-                            ? "Sign in to access your CV workspace"
-                            : "Start building your resume with AI"}
+                        {from === "export"
+                            ? "Create a free account to download your CV"
+                            : isLogin
+                                ? "Sign in to access your CV workspace"
+                                : "Start building your resume with AI"}
                     </p>
                 </div>
 
@@ -146,7 +156,7 @@ function LoginContent() {
                             width: "100%",
                             padding: "12px",
                             borderRadius: 12,
-                            background: "var(--color-primary)",
+                            background: "linear-gradient(135deg, #6366f1, #4f46e5)",
                             color: "white",
                             border: "none",
                             fontWeight: 600,
@@ -168,7 +178,7 @@ function LoginContent() {
                         style={{
                             background: "none",
                             border: "none",
-                            color: "var(--color-primary)",
+                            color: "#6366f1",
                             fontWeight: 600,
                             cursor: "pointer",
                             padding: 0,

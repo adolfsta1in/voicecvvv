@@ -5,9 +5,14 @@ import React from "react";
 interface PricingModalProps {
     isOpen: boolean;
     onClose: () => void;
+    userId?: string | null;
 }
 
-export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
+import { useRouter } from "next/navigation";
+
+export default function PricingModal({ isOpen, onClose, userId }: PricingModalProps) {
+    const router = useRouter();
+
     if (!isOpen) return null;
 
     return (
@@ -112,7 +117,16 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                         <button
                             className="btn-secondary"
                             style={{ width: "100%", padding: "14px", fontSize: "1rem" }}
-                            onClick={() => alert("Lemon Squeezy checkout will open here.")}
+                            onClick={() => {
+                                if (!userId) {
+                                    localStorage.setItem("chatcv_pending_checkout", "single");
+                                    router.push("/login?from=export");
+                                    return;
+                                }
+                                // TODO: Replace with your actual Lemon Squeezy single CV checkout link
+                                const singleCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/YOUR_SINGLE_VARIANT_ID";
+                                window.open(`${singleCheckoutUrl}?checkout[custom][user_id]=${userId}`, "_blank");
+                            }}
                         >
                             Buy Single CV
                         </button>
@@ -175,7 +189,15 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
                         <button
                             className="btn-primary"
                             style={{ width: "100%", padding: "14px", fontSize: "1rem" }}
-                            onClick={() => window.open("https://voicecvai.lemonsqueezy.com/checkout/buy/a5ba9fec-f920-4087-b5f6-c9896fa9ce99?discount=0", "_blank")}
+                            onClick={() => {
+                                if (!userId) {
+                                    localStorage.setItem("chatcv_pending_checkout", "pro");
+                                    router.push("/login?from=export");
+                                    return;
+                                }
+                                const proCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/a5ba9fec-f920-4087-b5f6-c9896fa9ce99?discount=0";
+                                window.open(`${proCheckoutUrl}&checkout[custom][user_id]=${userId}`, "_blank");
+                            }}
                         >
                             Subscribe Now
                         </button>

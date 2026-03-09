@@ -6,6 +6,8 @@ import { exportToPDF } from "@/lib/pdf-export";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
+import { getUserSubscription, decrementExportCredit } from "@/lib/subscription-api";
+import PricingModal from "@/components/PricingModal";
 
 function formatDate(iso: string) {
     const d = new Date(iso);
@@ -33,14 +35,25 @@ export default function AccountPage() {
     const [renameValue, setRenameValue] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    // MOCK: Replace with actual database check
-    const isPro = true;
+    const [exportCredits, setExportCredits] = useState(0);
+    const [isPro, setIsPro] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [showPricing, setShowPricing] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     useEffect(() => {
         async function load() {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
             if (user?.email) setUserEmail(user.email);
+            if (user?.id) {
+                setUserId(user.id);
+                const sub = await getUserSubscription();
+                if (sub) {
+                    setExportCredits(sub.export_credits);
+                    setIsPro(sub.plan === 'pro');
+                }
+            }
             const data = await getUserCVs();
             setCvs(data);
             setLoading(false);
@@ -70,6 +83,24 @@ export default function AccountPage() {
     function startRename(cv: CVDbRecord) {
         setRenamingId(cv.id);
         setRenameValue(cv.name);
+    }
+
+    async function handleExportCV(cvContent: any) {
+        if (exportCredits <= 0) {
+            setShowPricing(true);
+            return;
+        }
+
+        setIsExporting(true);
+        try {
+            await exportToPDF(cvContent, (cvContent?.templateId as any) || "classic");
+            setExportCredits(prev => prev - 1);
+            await decrementExportCredit();
+        } catch (error) {
+            console.error("Export failed", error);
+        } finally {
+            setIsExporting(false);
+        }
     }
 
     return (
@@ -121,7 +152,7 @@ export default function AccountPage() {
                     >
                         V
                     </div>
-                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>VoiceCV</span>
+                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>ChatCV</span>
                 </Link>
 
                 <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -536,7 +567,7 @@ export default function AccountPage() {
                                             Open
                                         </Link>
                                         <button
-                                            onClick={() => exportToPDF(cv.content, (cv.content?.templateId as any) || "classic")}
+                                            onClick={() => handleExportCV(cv.content)}
                                             style={{
                                                 flex: 1,
                                                 padding: "8px 0",
@@ -639,6 +670,8 @@ export default function AccountPage() {
                     </div>
                 )}
             </div>
+
+            <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} userId={userId} />
         </div>
     );
 }

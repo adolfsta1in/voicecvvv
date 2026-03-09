@@ -35,7 +35,8 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Protect the /app workspace route
+    // Remove /app route protection to allow anonymous CV building
+    /*
     if (
         !user &&
         request.nextUrl.pathname.startsWith('/app')
@@ -44,6 +45,7 @@ export async function updateSession(request: NextRequest) {
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
+    */
 
     // Redirect logged-in users away from the login page
     if (

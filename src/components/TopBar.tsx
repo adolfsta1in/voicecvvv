@@ -5,12 +5,15 @@ import { useCVStore } from "@/lib/cv-store";
 import { exportToPDF } from "@/lib/pdf-export";
 import { saveCV } from "@/lib/cv-api";
 import { createClient } from "@/lib/supabase/client";
+import { getUserSubscription, decrementExportCredit } from "@/lib/subscription-api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { logout } from "@/app/login/actions";
 import PricingModal from "./PricingModal";
 import { ThemeToggle } from "./ThemeToggle";
 
 export default function TopBar() {
+    const router = useRouter();
     const { state, dispatch } = useCVStore();
     const cv = state.cvData;
     const templateId = state.templateId;
@@ -18,6 +21,40 @@ export default function TopBar() {
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "autosaving" | "autosaved" | "error">("idle");
     const [showPricing, setShowPricing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [exportCredits, setExportCredits] = useState(0);
+    const [isPro, setIsPro] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+
+    React.useEffect(() => {
+        async function loadSub() {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                setUserId(user.id);
+                const sub = await getUserSubscription();
+                if (sub) {
+                    setExportCredits(sub.export_credits);
+                    setIsPro(sub.plan === 'pro');
+                }
+
+                // Handle pending checkout after signup/login
+                const pendingCheckout = localStorage.getItem("chatcv_pending_checkout");
+                if (pendingCheckout) {
+                    localStorage.removeItem("chatcv_pending_checkout");
+
+                    if (pendingCheckout === "single") {
+                        // TODO: Replace with your actual Lemon Squeezy single CV checkout link
+                        const singleCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/YOUR_SINGLE_VARIANT_ID";
+                        window.location.href = `${singleCheckoutUrl}?checkout[custom][user_id]=${user.id}`;
+                    } else if (pendingCheckout === "pro") {
+                        const proCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/a5ba9fec-f920-4087-b5f6-c9896fa9ce99?discount=0";
+                        window.location.href = `${proCheckoutUrl}&checkout[custom][user_id]=${user.id}`;
+                    }
+                }
+            }
+        }
+        loadSub();
+    }, []);
 
     React.useEffect(() => {
         const start = () => setIsExporting(true);
@@ -29,9 +66,6 @@ export default function TopBar() {
             window.removeEventListener("pdf-export-end", end);
         };
     }, []);
-
-    // MOCK: Replace with actual database check
-    const isPro = true;
 
     // Calculate completion percentage
     const sections = [
@@ -45,20 +79,24 @@ export default function TopBar() {
     const filled = sections.filter(Boolean).length;
     const progress = Math.round((filled / sections.length) * 100);
 
-    const handleExportClick = () => {
-        // Mocking user having 0 credits and no subscription out of the box.
-        const hasCredits = true; // TEMPORARILY SET TO TRUE FOR TESTING
-        const hasSubscription = false;
-
-        if (!hasCredits && !hasSubscription) {
+    const handleExportClick = async () => {
+        if (exportCredits <= 0) {
             setShowPricing(true);
         } else {
-            handleExport();
+            await handleExport();
         }
     };
 
     const handleExport = async () => {
-        await exportToPDF(cv, templateId);
+        try {
+            await exportToPDF(cv, templateId);
+            // Deduct local state
+            setExportCredits(prev => prev - 1);
+            // Deduct from DB
+            await decrementExportCredit();
+        } catch (error) {
+            console.error("Export failed", error);
+        }
     };
 
 
@@ -144,7 +182,7 @@ export default function TopBar() {
                     >
                         V
                     </div>
-                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>VoiceCV</span>
+                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>ChatCV</span>
                 </Link>
             </div>
 
@@ -181,7 +219,7 @@ export default function TopBar() {
                 <span
                     style={{
                         fontSize: "0.75rem",
-                        color: "var(--color-primary)",
+                        color: "#6366f1",
                         fontWeight: 700,
                     }}
                 >
@@ -271,19 +309,49 @@ export default function TopBar() {
                                 saveStatus === "autosaved" ? "✓ Auto-saved" :
                                     saveStatus === "error" ? "Error" : "Save CV"}
                 </button>
-                <button
-                    onClick={() => logout()}
-                    style={{
-                        background: "none",
-                        border: "none",
-                        color: "var(--muted)",
-                        fontSize: "0.8125rem",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                    }}
-                >
-                    Log Out
-                </button>
+                {userId ? (
+                    <button
+                        onClick={() => logout()}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: "var(--muted)",
+                            fontSize: "0.8125rem",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                        }}
+                    >
+                        Log Out
+                    </button>
+                ) : (
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <Link
+                            href="/login"
+                            style={{
+                                color: "var(--foreground)",
+                                fontSize: "0.8125rem",
+                                fontWeight: 500,
+                                textDecoration: "none"
+                            }}
+                        >
+                            Log In
+                        </Link>
+                        <Link
+                            href="/login"
+                            style={{
+                                padding: "6px 14px",
+                                borderRadius: "8px",
+                                background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                                color: "white",
+                                fontSize: "0.8125rem",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                            }}
+                        >
+                            Sign Up
+                        </Link>
+                    </div>
+                )}
                 <button
                     onClick={handleExportClick}
                     disabled={!cv.personalInfo.fullName || isExporting}
@@ -316,7 +384,7 @@ export default function TopBar() {
                 </button>
             </div>
 
-            <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} />
+            <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} userId={userId} />
         </div>
     );
 }

@@ -36,7 +36,7 @@ export async function exportToPDF(cvData: CVData, templateId: TemplateId) {
         // Create a reasonable filename
         const name = cvData.personalInfo?.fullName
             ? `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`
-            : "VoiceCV.pdf";
+            : "ChatCV.pdf";
 
         a.download = name;
         document.body.appendChild(a);

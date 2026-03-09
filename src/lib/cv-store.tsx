@@ -23,7 +23,10 @@ type CVAction =
     | { type: "REORDER_LIST"; payload: { path: keyof CVData; newOrder: unknown[] } }
     | { type: "SET_THEME_COLOR"; payload: string }
     | { type: "SET_SPACING"; payload: "tight" | "normal" | "relaxed" }
-    | { type: "SET_FONT_SIZE"; payload: "small" | "normal" | "large" };
+    | { type: "SET_FONT_SIZE"; payload: "small" | "normal" | "large" }
+    | { type: "RESTORE_STATE"; payload: Partial<CVState> };
+
+const LOCAL_STORAGE_KEY = "chatcv_draft_state";
 
 const initialState: CVState = {
     messages: [],
@@ -93,6 +96,11 @@ function cvReducer(state: CVState, action: CVAction): CVState {
                 ...state,
                 cvData: { ...state.cvData, layout: { ...state.cvData.layout, fontSize: action.payload } },
             };
+        case "RESTORE_STATE":
+            return {
+                ...state,
+                ...action.payload,
+            };
         default:
             return state;
     }
@@ -105,6 +113,36 @@ const CVContext = createContext<{
 
 export function CVProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(cvReducer, initialState);
+    const [isInitialized, setIsInitialized] = React.useState(false);
+
+    // Load from local storage on mount
+    React.useEffect(() => {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                dispatch({ type: "RESTORE_STATE", payload: parsed });
+            } catch (e) {
+                console.error("Failed to parse saved CV state", e);
+            }
+        }
+        setIsInitialized(true);
+    }, []);
+
+    // Save to local storage on change
+    React.useEffect(() => {
+        if (isInitialized) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+                messages: state.messages,
+                cvData: state.cvData,
+                templateId: state.templateId,
+                // Don't persist cvId or isLoading across sessions
+            }));
+        }
+    }, [state.messages, state.cvData, state.templateId, isInitialized]);
+
+    if (!isInitialized) return null; // Or a loader
+
     return (
         <CVContext.Provider value={{ state, dispatch }}>
             {children}

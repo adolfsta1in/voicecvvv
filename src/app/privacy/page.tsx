@@ -34,7 +34,7 @@ export default function PrivacyPolicy() {
                 <section style={{ marginBottom: 40 }} className="chat-markdown">
                     <h3>1. Information We Collect</h3>
                     <p>
-                        When you use VoiceCV, we collect the information you explicitly provide during your conversation with our AI assistant. This includes your name, work experience, education, skills, and any other professional details you choose to share for the purpose of generating your resume.
+                        When you use ChatCV, we collect the information you explicitly provide during your conversation with our AI assistant. This includes your name, work experience, education, skills, and any other professional details you choose to share for the purpose of generating your resume.
                     </p>
                     <p>
                         We securely store this information in your account so that you can revisit, edit, and export your CV at any time. We also collect basic account information such as your email address when you sign up.
