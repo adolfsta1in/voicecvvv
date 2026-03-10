@@ -183,6 +183,7 @@ export default function AccountPage() {
                     )}
                     <Link
                         href="/app"
+                        onClick={() => localStorage.removeItem("chatcv_draft_state")}
                         style={{
                             padding: "8px 20px",
                             background: "linear-gradient(135deg, #6366f1, #4f46e5)",
@@ -203,7 +204,10 @@ export default function AccountPage() {
                         New CV
                     </Link>
                     <button
-                        onClick={() => logout()}
+                        onClick={() => {
+                            localStorage.removeItem("chatcv_draft_state");
+                            logout();
+                        }}
                         style={{
                             background: "none",
                             border: "none",
@@ -345,6 +349,7 @@ export default function AccountPage() {
                         </p>
                         <Link
                             href="/app"
+                            onClick={() => localStorage.removeItem("chatcv_draft_state")}
                             style={{
                                 padding: "12px 28px",
                                 background: "linear-gradient(135deg, #6366f1, #4f46e5)",

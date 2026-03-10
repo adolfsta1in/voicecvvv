@@ -85,11 +85,7 @@ export default function Home() {
       <section
         className="bg-grid-pattern"
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          padding: "100px 24px 80px",
+          padding: "80px 24px 100px",
           position: "relative",
           overflow: "hidden",
         }}
@@ -108,376 +104,388 @@ export default function Home() {
           }}
         />
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div
-            className="animate-fade-in-up"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 16px",
-              background: "var(--surface)",
-              border: "1px solid var(--border-color)",
-              borderRadius: 100,
-              fontSize: "0.8125rem",
-              color: "var(--foreground)",
-              fontWeight: 600,
-              marginBottom: 32,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-            }}
-          >
-            <span
+        <div style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 1200,
+          margin: "0 auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          gap: "64px",
+          alignItems: "center",
+        }}>
+          {/* Left Column Text */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left" }}>
+            <div
+              className="animate-fade-in-up"
               style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: "#22c55e",
-                boxShadow: "0 0 8px rgba(34, 197, 94, 0.6)",
-              }}
-            />
-            AI-powered resume builder
-          </div>
-
-          <h1
-            className="animate-fade-in-up"
-            style={{
-              fontSize: "clamp(3rem, 6vw, 4.5rem)",
-              fontWeight: 800,
-              lineHeight: 1.05,
-              marginBottom: 24,
-              animationDelay: "0.1s",
-              letterSpacing: "-0.03em",
-            }}
-          >
-            AI Resume Builder That
-            <br />
-            <span
-              style={{
-                background: "linear-gradient(to right, #6366f1, #a855f7, #6366f1)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundSize: "200% auto",
-                animation: "gradient-x 4s linear infinite",
-              }}
-            >
-              Writes Your CV For You
-            </span>
-          </h1>
-
-          <p
-            className="animate-fade-in-up"
-            style={{
-              fontSize: "1.25rem",
-              color: "var(--muted)",
-              lineHeight: 1.6,
-              maxWidth: 600,
-              marginBottom: 48,
-              animationDelay: "0.2s",
-            }}
-          >
-            Create a professional resume by simply chatting with AI. ChatCV asks smart questions about your experience and instantly builds a polished CV ready to download.
-          </p>
-
-          <div
-            className="animate-fade-in-up"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 24,
-              animationDelay: "0.3s",
-            }}
-          >
-            <Link
-              href="/app"
-              className="btn-primary"
-              style={{
-                padding: "16px 40px",
-                fontSize: "1.125rem",
-                textDecoration: "none",
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 12,
-                borderRadius: 14,
+                gap: 8,
+                padding: "6px 16px",
+                background: "var(--surface)",
+                border: "1px solid var(--border-color)",
+                borderRadius: 100,
+                fontSize: "0.8125rem",
+                color: "var(--foreground)",
+                fontWeight: 600,
+                marginBottom: 32,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
               }}
             >
-              Create My Resume
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s" }} className="group-hover:translate-x-1">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </Link>
-
-            {/* Social Proof */}
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
-              <div style={{ display: "flex", marginLeft: 10 }}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: "50%",
-                      background: `var(--surface-hover)`,
-                      border: "2px solid var(--background)",
-                      marginLeft: -10,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 12,
-                      overflow: "hidden"
-                    }}
-                  >
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}&backgroundColor=e2e8f0`} alt="User avatar" width="32" height="32" />
-                  </div>
-                ))}
-              </div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{ display: "flex", gap: 2, color: "#f59e0b", marginBottom: 2 }}>
-                  {"★".repeat(5)}
-                </div>
-                <div style={{ fontSize: "0.875rem", color: "var(--muted)", fontWeight: 500 }}>
-                  <strong style={{ color: "var(--foreground)" }}>10,000+</strong> CVs built
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* App Preview */}
-      <section
-        className="animate-fade-in-up animate-float"
-        style={{
-          maxWidth: 1000,
-          margin: "0 auto 100px",
-          padding: "0 24px",
-          animationDelay: "0.4s",
-        }}
-      >
-        <div
-          style={{
-            borderRadius: 16,
-            border: "1px solid var(--border-color)",
-            overflow: "hidden",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
-            background: "var(--surface)",
-          }}
-        >
-          {/* Browser bar mockup */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "12px 16px",
-              borderBottom: "1px solid var(--border-color)",
-              background: "var(--background)",
-            }}
-          >
-            <div style={{ display: "flex", gap: 6 }}>
-              <div
+              <span
                 style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: "50%",
-                  background: "#ef4444",
-                }}
-              />
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: "50%",
-                  background: "#f59e0b",
-                }}
-              />
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
+                  width: 8,
+                  height: 8,
                   borderRadius: "50%",
                   background: "#22c55e",
+                  boxShadow: "0 0 8px rgba(34, 197, 94, 0.6)",
                 }}
               />
+              AI-powered resume builder
             </div>
-            <div
+
+            <h1
+              className="animate-fade-in-up"
               style={{
-                flex: 1,
-                textAlign: "center",
-                fontSize: "0.75rem",
-                color: "var(--muted)",
+                fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+                fontWeight: 800,
+                lineHeight: 1.1,
+                marginBottom: 24,
+                animationDelay: "0.1s",
+                letterSpacing: "-0.03em",
+                textAlign: "left",
               }}
             >
-              chatcv.app
-            </div>
-          </div>
-          {/* App content */}
-          <div
-            style={{
-              display: "flex",
-              height: 400,
-            }}
-          >
-            {/* Chat side */}
-            <div
+              AI Resume Builder That
+              <br />
+              <span
+                style={{
+                  background: "linear-gradient(to right, #6366f1, #a855f7, #6366f1)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundSize: "200% auto",
+                  animation: "gradient-x 4s linear infinite",
+                }}
+              >
+                Writes Your CV For You
+              </span>
+            </h1>
+
+            <p
+              className="animate-fade-in-up"
               style={{
-                width: "40%",
-                borderRight: "1px solid var(--border-color)",
-                padding: 20,
+                fontSize: "1.125rem",
+                color: "var(--muted)",
+                lineHeight: 1.6,
+                maxWidth: 500,
+                marginBottom: 48,
+                animationDelay: "0.2s",
+                textAlign: "left",
+              }}
+            >
+              Create a professional resume by simply chatting with AI. ChatCV asks smart questions about your experience and instantly builds a polished CV ready to download.
+            </p>
+
+            <div
+              className="animate-fade-in-up"
+              style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 12,
+                alignItems: "flex-start",
+                gap: 24,
+                animationDelay: "0.3s",
               }}
             >
-              <div
+              <Link
+                href="/app"
+                className="btn-primary"
                 style={{
-                  padding: "10px 14px",
-                  borderRadius: "14px 14px 14px 4px",
-                  background: "var(--background)",
-                  border: "1px solid var(--border-color)",
-                  fontSize: "0.8125rem",
-                  color: "var(--foreground)",
-                  maxWidth: "85%",
+                  padding: "16px 40px",
+                  fontSize: "1.125rem",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 12,
+                  borderRadius: 14,
                 }}
               >
-                Hi! I&apos;m your CV assistant. Let&apos;s start building your resume.
-                What&apos;s your name?
-              </div>
-              <div
-                style={{
-                  alignSelf: "flex-end",
-                  padding: "10px 14px",
-                  borderRadius: "14px 14px 4px 14px",
-                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                  color: "white",
-                  fontSize: "0.8125rem",
-                  maxWidth: "85%",
-                }}
-              >
-                I&apos;m Sarah Johnson, a product designer with 5 years of experience.
-              </div>
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "14px 14px 14px 4px",
-                  background: "var(--background)",
-                  border: "1px solid var(--border-color)",
-                  fontSize: "0.8125rem",
-                  color: "var(--foreground)",
-                  maxWidth: "85%",
-                }}
-              >
-                Great to meet you, Sarah! That&apos;s a fantastic field. Can you tell me
-                about your most recent role?
+                Create My Resume
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s" }} className="group-hover:translate-x-1">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </Link>
+
+              {/* Social Proof */}
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 12 }}>
+                <div style={{ display: "flex", marginLeft: 10 }}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: `var(--surface-hover)`,
+                        border: "2px solid var(--background)",
+                        marginLeft: -10,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 12,
+                        overflow: "hidden"
+                      }}
+                    >
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}&backgroundColor=e2e8f0`} alt="User avatar" width="32" height="32" />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ display: "flex", gap: 2, color: "#f59e0b", marginBottom: 2 }}>
+                    {"★".repeat(5)}
+                  </div>
+                  <div style={{ fontSize: "0.875rem", color: "var(--muted)", fontWeight: 500 }}>
+                    <strong style={{ color: "var(--foreground)" }}>10,000+</strong> CVs built
+                  </div>
+                </div>
               </div>
             </div>
-            {/* CV side */}
+          </div>
+
+          {/* Right Column App Preview */}
+          <div
+            className="animate-fade-in-up animate-float"
+            style={{
+              animationDelay: "0.4s",
+              width: "100%",
+            }}
+          >
             <div
               style={{
-                flex: 1,
-                padding: 20,
-                display: "flex",
-                justifyContent: "center",
+                borderRadius: 16,
+                border: "1px solid var(--border-color)",
+                overflow: "hidden",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.08)",
+                background: "var(--surface)",
               }}
             >
+              {/* Browser bar mockup */}
               <div
                 style={{
-                  background: "white",
-                  borderRadius: 8,
-                  width: "100%",
-                  maxWidth: 360,
-                  padding: 24,
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-                  border: "1px solid #e5e7eb",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "12px 16px",
+                  borderBottom: "1px solid var(--border-color)",
+                  background: "var(--background)",
                 }}
               >
-                <div style={{ textAlign: "center", marginBottom: 16 }}>
+                <div style={{ display: "flex", gap: 6 }}>
                   <div
                     style={{
-                      fontSize: "1.25rem",
-                      fontWeight: 800,
-                      color: "#1a1a2e",
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: "#ef4444",
                     }}
-                  >
-                    Sarah Johnson
-                  </div>
+                  />
                   <div
                     style={{
-                      fontSize: "0.8125rem",
-                      color: "#6366f1",
-                      fontWeight: 500,
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: "#f59e0b",
                     }}
-                  >
-                    Product Designer
-                  </div>
+                  />
+                  <div
+                    style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: "#22c55e",
+                    }}
+                  />
                 </div>
                 <div
                   style={{
-                    height: 2,
-                    background:
-                      "linear-gradient(90deg, transparent, #6366f1, transparent)",
-                    marginBottom: 16,
-                  }}
-                />
-                <div
-                  style={{
-                    width: "100%",
-                    height: 8,
-                    background: "#f1f5f9",
-                    borderRadius: 4,
-                    marginBottom: 8,
-                  }}
-                />
-                <div
-                  style={{
-                    width: "70%",
-                    height: 8,
-                    background: "#f1f5f9",
-                    borderRadius: 4,
-                    marginBottom: 8,
-                  }}
-                />
-                <div
-                  style={{
-                    width: "85%",
-                    height: 8,
-                    background: "#f1f5f9",
-                    borderRadius: 4,
-                    marginBottom: 20,
-                  }}
-                />
-                <div
-                  style={{
-                    fontSize: "0.6875rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    color: "#6366f1",
-                    borderBottom: "2px solid #6366f1",
-                    paddingBottom: 3,
-                    marginBottom: 8,
+                    flex: 1,
+                    textAlign: "center",
+                    fontSize: "0.75rem",
+                    color: "var(--muted)",
                   }}
                 >
-                  Experience
+                  chatcv.app
                 </div>
+              </div>
+              {/* App content */}
+              <div
+                style={{
+                  display: "flex",
+                  height: 380,
+                }}
+              >
+                {/* Chat side */}
                 <div
                   style={{
-                    width: "100%",
-                    height: 8,
-                    background: "#f1f5f9",
-                    borderRadius: 4,
-                    marginBottom: 6,
+                    width: "40%",
+                    borderRight: "1px solid var(--border-color)",
+                    padding: 20,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
                   }}
-                />
+                >
+                  <div
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "14px 14px 14px 4px",
+                      background: "var(--background)",
+                      border: "1px solid var(--border-color)",
+                      fontSize: "0.8125rem",
+                      color: "var(--foreground)",
+                      maxWidth: "85%",
+                    }}
+                  >
+                    Hi! I&apos;m your CV assistant. Let&apos;s start building your resume.
+                    What&apos;s your name?
+                  </div>
+                  <div
+                    style={{
+                      alignSelf: "flex-end",
+                      padding: "10px 14px",
+                      borderRadius: "14px 14px 4px 14px",
+                      background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                      color: "white",
+                      fontSize: "0.8125rem",
+                      maxWidth: "85%",
+                    }}
+                  >
+                    I&apos;m Sarah Johnson, a product manager with 5 years of experience.
+                  </div>
+                  <div
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: "14px 14px 14px 4px",
+                      background: "var(--background)",
+                      border: "1px solid var(--border-color)",
+                      fontSize: "0.8125rem",
+                      color: "var(--foreground)",
+                      maxWidth: "85%",
+                    }}
+                  >
+                    Great to meet you, Sarah! That&apos;s a fantastic field. Can you tell me
+                    about your most recent role?
+                  </div>
+                </div>
+                {/* CV side */}
                 <div
                   style={{
-                    width: "60%",
-                    height: 8,
-                    background: "#f1f5f9",
-                    borderRadius: 4,
+                    flex: 1,
+                    padding: 20,
+                    display: "flex",
+                    justifyContent: "center",
                   }}
-                />
+                >
+                  <div
+                    style={{
+                      background: "white",
+                      borderRadius: 8,
+                      width: "100%",
+                      maxWidth: 360,
+                      padding: 24,
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                      border: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <div style={{ textAlign: "center", marginBottom: 16 }}>
+                      <div
+                        style={{
+                          fontSize: "1.25rem",
+                          fontWeight: 800,
+                          color: "#1a1a2e",
+                        }}
+                      >
+                        Sarah Johnson
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.8125rem",
+                          color: "#6366f1",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Product Manager
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        height: 2,
+                        background:
+                          "linear-gradient(90deg, transparent, #6366f1, transparent)",
+                        marginBottom: 16,
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "100%",
+                        height: 8,
+                        background: "#f1f5f9",
+                        borderRadius: 4,
+                        marginBottom: 8,
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "70%",
+                        height: 8,
+                        background: "#f1f5f9",
+                        borderRadius: 4,
+                        marginBottom: 8,
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "85%",
+                        height: 8,
+                        background: "#f1f5f9",
+                        borderRadius: 4,
+                        marginBottom: 20,
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: "0.6875rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "#6366f1",
+                        borderBottom: "2px solid #6366f1",
+                        paddingBottom: 3,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Experience
+                    </div>
+                    <div
+                      style={{
+                        width: "100%",
+                        height: 8,
+                        background: "#f1f5f9",
+                        borderRadius: 4,
+                        marginBottom: 6,
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "60%",
+                        height: 8,
+                        background: "#f1f5f9",
+                        borderRadius: 4,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

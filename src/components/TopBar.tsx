@@ -311,7 +311,11 @@ export default function TopBar() {
                 </button>
                 {userId ? (
                     <button
-                        onClick={() => logout()}
+                        onClick={() => {
+                            dispatch({ type: "RESET_CV" });
+                            localStorage.removeItem("chatcv_draft_state");
+                            logout();
+                        }}
                         style={{
                             background: "none",
                             border: "none",

@@ -24,7 +24,8 @@ type CVAction =
     | { type: "SET_THEME_COLOR"; payload: string }
     | { type: "SET_SPACING"; payload: "tight" | "normal" | "relaxed" }
     | { type: "SET_FONT_SIZE"; payload: "small" | "normal" | "large" }
-    | { type: "RESTORE_STATE"; payload: Partial<CVState> };
+    | { type: "RESTORE_STATE"; payload: Partial<CVState> }
+    | { type: "RESET_CV" };
 
 const LOCAL_STORAGE_KEY = "chatcv_draft_state";
 
@@ -100,6 +101,11 @@ function cvReducer(state: CVState, action: CVAction): CVState {
             return {
                 ...state,
                 ...action.payload,
+            };
+        case "RESET_CV":
+            return {
+                ...initialState,
+                cvData: { ...emptyCVData },
             };
         default:
             return state;
