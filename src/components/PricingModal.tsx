@@ -195,8 +195,13 @@ export default function PricingModal({ isOpen, onClose, userId }: PricingModalPr
                                     router.push("/login?from=export");
                                     return;
                                 }
-                                const proCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/a5ba9fec-f920-4087-b5f6-c9896fa9ce99?discount=0";
-                                window.open(`${proCheckoutUrl}&checkout[custom][user_id]=${userId}`, "_blank");
+                                // TODO: Replace with your actual Lemon Squeezy pro subscription checkout link
+                                const proCheckoutUrl = "";
+                                if (proCheckoutUrl) {
+                                    window.open(`${proCheckoutUrl}&checkout[custom][user_id]=${userId}`, "_blank");
+                                } else {
+                                    alert("Pro checkout link not configured yet.");
+                                }
                             }}
                         >
                             Subscribe Now

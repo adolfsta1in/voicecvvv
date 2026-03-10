@@ -44,11 +44,20 @@ export default function TopBar() {
 
                     if (pendingCheckout === "single") {
                         // TODO: Replace with your actual Lemon Squeezy single CV checkout link
-                        const singleCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/YOUR_SINGLE_VARIANT_ID";
-                        window.location.href = `${singleCheckoutUrl}?checkout[custom][user_id]=${user.id}`;
+                        const singleCheckoutUrl = "";
+                        if (singleCheckoutUrl) {
+                            window.location.href = `${singleCheckoutUrl}?checkout[custom][user_id]=${user.id}`;
+                        } else {
+                            console.warn("Single checkout link not configured");
+                        }
                     } else if (pendingCheckout === "pro") {
-                        const proCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/a5ba9fec-f920-4087-b5f6-c9896fa9ce99?discount=0";
-                        window.location.href = `${proCheckoutUrl}&checkout[custom][user_id]=${user.id}`;
+                        // TODO: Replace with your actual Lemon Squeezy pro subscription checkout link
+                        const proCheckoutUrl = "";
+                        if (proCheckoutUrl) {
+                            window.location.href = `${proCheckoutUrl}&checkout[custom][user_id]=${user.id}`;
+                        } else {
+                            console.warn("Pro checkout link not configured");
+                        }
                     }
                 }
             }
