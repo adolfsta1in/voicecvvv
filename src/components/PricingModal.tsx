@@ -124,7 +124,7 @@ export default function PricingModal({ isOpen, onClose, userId }: PricingModalPr
                                     return;
                                 }
                                 // TODO: Replace with your actual Lemon Squeezy single CV checkout link
-                                const singleCheckoutUrl = "https://voicecvai.lemonsqueezy.com/checkout/buy/YOUR_SINGLE_VARIANT_ID";
+                                const singleCheckoutUrl = "https://chatcvai.lemonsqueezy.com/checkout/buy/42c49fff-0fb5-4ddf-a101-1d0c6414ce07";
                                 window.open(`${singleCheckoutUrl}?checkout[custom][user_id]=${userId}`, "_blank");
                             }}
                         >
@@ -195,13 +195,8 @@ export default function PricingModal({ isOpen, onClose, userId }: PricingModalPr
                                     router.push("/login?from=export");
                                     return;
                                 }
-                                // TODO: Replace with your actual Lemon Squeezy pro subscription checkout link
-                                const proCheckoutUrl = "";
-                                if (proCheckoutUrl) {
-                                    window.open(`${proCheckoutUrl}&checkout[custom][user_id]=${userId}`, "_blank");
-                                } else {
-                                    alert("Pro checkout link not configured yet.");
-                                }
+                                const proCheckoutUrl = "https://chatcvai.lemonsqueezy.com/checkout/buy/67be3a0f-22f6-4ec9-a5a2-60b7b0e2518c";
+                                window.open(`${proCheckoutUrl}?checkout[custom][user_id]=${userId}`, "_blank");
                             }}
                         >
                             Subscribe Now

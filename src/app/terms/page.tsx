@@ -87,7 +87,7 @@ export default function TermsOfService() {
                 <section style={{ marginBottom: 40 }} className="chat-markdown">
                     <h3>Contact Us</h3>
                     <p>
-                        If you have any questions about these Terms, please contact us at <a href="mailto:support@voicecv.app" style={{ color: "var(--color-primary)" }}>support@voicecv.app</a>.
+                        If you have any questions about these Terms, please contact us at <a href="mailto:support@chatcvai.com" style={{ color: "var(--color-primary)" }}>support@chatcvai.com</a>.
                     </p>
                 </section>
             </main>
