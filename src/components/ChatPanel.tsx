@@ -6,43 +6,18 @@ import { ChatMessage } from "@/lib/cv-types";
 
 import ReactMarkdown from "react-markdown";
 
-// Extend Window for SpeechRecognition
-interface SpeechRecognitionEvent {
-    results: { [key: number]: { [key: number]: { transcript: string } } };
-    resultIndex: number;
-}
-
 
 export default function ChatPanel() {
     const { state, dispatch } = useCVStore();
     const [input, setInput] = useState("");
     const [isListening, setIsListening] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const hasInitialized = useRef(false);
-    const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
-
-    function createRecognition() {
-        const SpeechRecognition =
-            (window as unknown as Record<string, unknown>).SpeechRecognition ||
-            (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
-        if (!SpeechRecognition) return null;
-
-        const recognition = new (SpeechRecognition as new () => {
-            continuous: boolean;
-            interimResults: boolean;
-            lang: string;
-            onresult: ((e: SpeechRecognitionEvent) => void) | null;
-            onend: (() => void) | null;
-            onerror: ((e: { error: string }) => void) | null;
-            start: () => void;
-            stop: () => void;
-        })();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = "en-US";
-        return recognition;
-    }
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const streamRef = useRef<MediaStream | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,52 +45,88 @@ export default function ChatPanel() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const toggleListening = useCallback(() => {
-        if (isListening) {
-            // Stop listening
-            recognitionRef.current?.stop();
-            setIsListening(false);
-            return;
-        }
-
-        // Start listening
-        const recognition = createRecognition();
-        if (!recognition) {
-            alert("Speech recognition is not supported in your browser. Please use Chrome.");
-            return;
-        }
-
-        recognitionRef.current = recognition;
-        let finalTranscript = "";
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-            let interim = "";
-            for (let i = event.resultIndex; i < Object.keys(event.results).length; i++) {
-                const result = event.results[i];
-                if (result && result[0]) {
-                    const transcript = result[0].transcript;
-                    // Check if it's a final result
-                    if ((event.results[i] as unknown as { isFinal: boolean }).isFinal) {
-                        finalTranscript += transcript;
-                    } else {
-                        interim = transcript;
-                    }
-                }
+    // Cleanup stream on unmount
+    useEffect(() => {
+        return () => {
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach((t) => t.stop());
             }
-            setInput(finalTranscript + interim);
         };
+    }, []);
 
-        recognition.onend = () => {
+    const toggleListening = useCallback(async () => {
+        if (isListening) {
+            // Stop recording
+            mediaRecorderRef.current?.stop();
             setIsListening(false);
-        };
+            return;
+        }
 
-        recognition.onerror = (e: { error: string }) => {
-            console.error("Speech recognition error:", e.error);
-            setIsListening(false);
-        };
+        // Start recording
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
 
-        recognition.start();
-        setIsListening(true);
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                    ? "audio/webm;codecs=opus"
+                    : "audio/webm",
+            });
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                // Stop all tracks
+                stream.getTracks().forEach((t) => t.stop());
+                streamRef.current = null;
+
+                const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+
+                if (audioBlob.size < 100) {
+                    // Too short / empty recording
+                    return;
+                }
+
+                // Transcribe via ElevenLabs Scribe v2
+                setIsTranscribing(true);
+                try {
+                    const formData = new FormData();
+                    formData.append("audio", audioBlob, "recording.webm");
+
+                    const res = await fetch("/api/transcribe", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json();
+                        console.error("Transcription error:", err);
+                        return;
+                    }
+
+                    const { text } = await res.json();
+                    if (text && text.trim()) {
+                        setInput((prev) => (prev ? prev + " " + text.trim() : text.trim()));
+                    }
+                } catch (err) {
+                    console.error("Transcription failed:", err);
+                } finally {
+                    setIsTranscribing(false);
+                }
+            };
+
+            mediaRecorder.start();
+            setIsListening(true);
+        } catch (err) {
+            console.error("Microphone access denied:", err);
+            alert("Microphone access is required for voice input. Please allow microphone access and try again.");
+        }
     }, [isListening]);
 
     async function sendToAI(msgs: ChatMessage[]) {
@@ -167,9 +178,9 @@ export default function ChatPanel() {
         const text = input.trim();
         if (!text || state.isLoading) return;
 
-        // Stop listening if active
+        // Stop recording if active
         if (isListening) {
-            recognitionRef.current?.stop();
+            mediaRecorderRef.current?.stop();
             setIsListening(false);
         }
 
@@ -350,8 +361,8 @@ export default function ChatPanel() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Listening indicator */}
-            {isListening && (
+            {/* Listening / Transcribing indicator */}
+            {(isListening || isTranscribing) && (
                 <div
                     style={{
                         padding: "8px 16px",
@@ -359,7 +370,7 @@ export default function ChatPanel() {
                         alignItems: "center",
                         gap: 8,
                         fontSize: "0.8125rem",
-                        color: "#ef4444",
+                        color: isTranscribing ? "#f59e0b" : "#ef4444",
                         fontWeight: 500,
                     }}
                 >
@@ -368,11 +379,11 @@ export default function ChatPanel() {
                             width: 8,
                             height: 8,
                             borderRadius: "50%",
-                            background: "#ef4444",
+                            background: isTranscribing ? "#f59e0b" : "#ef4444",
                             animation: "pulse-soft 1.5s ease-in-out infinite",
                         }}
                     />
-                    Listening... speak now
+                    {isTranscribing ? "Transcribing..." : "Recording... speak now"}
                 </div>
             )}
 
@@ -403,7 +414,7 @@ export default function ChatPanel() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyDown}
                         placeholder={
-                            isListening ? "Listening..." : "Type or tap the mic to speak..."
+                            isTranscribing ? "Transcribing..." : isListening ? "Recording..." : "Type or tap the mic to speak..."
                         }
                         rows={1}
                         style={{
