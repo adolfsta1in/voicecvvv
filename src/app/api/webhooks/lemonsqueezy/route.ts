@@ -11,8 +11,11 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 export async function POST(req: Request) {
     try {
+        // Debug: Log which key we're using
+        const keyType = process.env.SUPABASE_SERVICE_ROLE_KEY ? "service_role" : "anon";
+        console.log(`Webhook using Supabase key type: ${keyType}`);
+
         // 1. Verify the Webhook Signature
-        const clonedReq = req.clone();
         const eventType = req.headers.get("X-Event-Name");
         const body = await req.text();
         const signature = req.headers.get("X-Signature");
@@ -26,6 +29,7 @@ export async function POST(req: Request) {
         const signatureBuffer = Buffer.from(signature, "utf8");
 
         if (!crypto.timingSafeEqual(digest, signatureBuffer)) {
+            console.error("Invalid webhook signature");
             return new NextResponse("Invalid signature", { status: 403 });
         }
 
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
         const userId = customData.user_id;
 
         if (!userId) {
-            console.error("No user_id found in webhook custom_data", payload);
+            console.error("No user_id found in webhook custom_data. Full meta:", JSON.stringify(payload.meta));
             return new NextResponse("No user_id found", { status: 200 }); // Return 200 so LS doesn't retry
         }
 
@@ -58,13 +62,19 @@ export async function POST(req: Request) {
 
                 const currentCredits = userSub?.export_credits || 0;
 
-                await supabase
+                const { error: upsertError } = await supabase
                     .from("user_subscriptions")
                     .upsert({
                         user_id: userId,
+                        email: payload.data?.attributes?.user_email || null,
                         export_credits: currentCredits + 1,
                         updated_at: new Date().toISOString()
                     });
+                
+                if (upsertError) {
+                    console.error("Failed to increment export credits:", upsertError);
+                    return new NextResponse("Database Error", { status: 500 });
+                }
 
                 console.log(`Incremented export credits for user ${userId}. Total: ${currentCredits + 1}`);
             }
@@ -72,30 +82,42 @@ export async function POST(req: Request) {
 
         if (eventType === "subscription_created" || eventType === "subscription_updated") {
             // For monthly pro subscription: Give 10 credits
-            await supabase
+            const { error: subError } = await supabase
                 .from("user_subscriptions")
                 .upsert({
                     user_id: userId,
+                    email: payload.data?.attributes?.user_email || null,
                     plan: "pro",
                     export_credits: 10,
                     lemon_squeezy_customer_id: payload.data?.attributes?.customer_id?.toString() || null,
                     lemon_squeezy_subscription_id: payload.data?.id?.toString() || null,
                     updated_at: new Date().toISOString()
                 });
+            
+            if (subError) {
+                console.error("Failed to update subscription to Pro:", subError);
+                return new NextResponse("Database Error", { status: 500 });
+            }
 
             console.log(`Updated user ${userId} to Pro plan with 10 credits.`);
         }
 
         if (eventType === "subscription_expired" || eventType === "subscription_cancelled") {
             // Revert them to free plan and 0 credits
-            await supabase
+            const { error: cancelError } = await supabase
                 .from("user_subscriptions")
                 .upsert({
                     user_id: userId,
+                    email: payload.data?.attributes?.user_email || null,
                     plan: "free",
                     export_credits: 0,
                     updated_at: new Date().toISOString()
                 });
+
+            if (cancelError) {
+                console.error("Failed to revert subscription to Free:", cancelError);
+                return new NextResponse("Database Error", { status: 500 });
+            }
 
             console.log(`User ${userId} subscription ended. Reverted to Free plan.`);
         }

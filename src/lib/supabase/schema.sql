@@ -4,6 +4,7 @@
 CREATE TABLE public.user_subscriptions (
     user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     plan TEXT NOT NULL DEFAULT 'free', -- 'free' or 'pro'
+    email TEXT,
     export_credits INTEGER NOT NULL DEFAULT 0,
     lemon_squeezy_customer_id TEXT,
     lemon_squeezy_subscription_id TEXT,
@@ -20,6 +21,12 @@ CREATE POLICY "Users can view own subscription"
     FOR SELECT 
     USING (auth.uid() = user_id);
 
+-- Allow users to update their own subscription (needed for client-side credit decrement)
+CREATE POLICY "Users can update own subscription" 
+    ON public.user_subscriptions 
+    FOR UPDATE 
+    USING (auth.uid() = user_id);
+
 -- Optional: If you want to allow a secure backend (Service Role) to update everything without RLS blocking it
 -- RLS doesn't apply to service_role, so the webhook can update records securely!
 
@@ -27,8 +34,8 @@ CREATE POLICY "Users can view own subscription"
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.user_subscriptions (user_id, plan, export_credits)
-  VALUES (new.id, 'free', 0);
+  INSERT INTO public.user_subscriptions (user_id, email, plan, export_credits)
+  VALUES (new.id, new.email, 'free', 0);
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
