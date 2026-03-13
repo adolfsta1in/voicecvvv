@@ -34,8 +34,8 @@ export default function ContactPage() {
             <div style={{ maxWidth: 800, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
                 <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: 24 }}>Contact Us</h1>
                 <p style={{ fontSize: "1.125rem", color: "var(--muted)", marginBottom: 40, lineHeight: 1.6 }}>
-                    Have questions, feedback, or need support? We're here to help you get the most out of ChatCV. 
-                    Reach out to us and we'll get back to you as soon as possible.
+                    Have questions, feedback, or need support? We&apos;re here to help you get the most out of ChatCV. 
+                    Reach out to us and we&apos;ll get back to you as soon as possible.
                 </p>
                 <div style={{ background: "var(--surface)", border: "1px solid var(--border-color)", borderRadius: 16, padding: 32 }}>
                     <h2 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: 16 }}>Email Support</h2>

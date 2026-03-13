@@ -7,13 +7,11 @@ import { saveCV } from "@/lib/cv-api";
 import { createClient } from "@/lib/supabase/client";
 import { getUserSubscription, decrementExportCredit } from "@/lib/subscription-api";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { logout } from "@/app/login/actions";
 import PricingModal from "./PricingModal";
 import { ThemeToggle } from "./ThemeToggle";
 
 export default function TopBar() {
-    const router = useRouter();
     const { state, dispatch } = useCVStore();
     const cv = state.cvData;
     const templateId = state.templateId;

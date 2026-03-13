@@ -80,7 +80,7 @@ export default function TermsOfService() {
                         <li><strong>Pro Plan:</strong> A monthly subscription of $9.99 allowing up to 10 resume downloads per month.</li>
                     </ul>
                     <p>
-                        All payments are processed securely via Lemon Squeezy, our merchant of record. By completing a purchase, you also agree to Lemon Squeezy's terms and conditions.
+                        All payments are processed securely via Lemon Squeezy, our merchant of record. By completing a purchase, you also agree to Lemon Squeezy&apos;s terms and conditions.
                     </p>
                 </section>
 

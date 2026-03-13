@@ -221,6 +221,7 @@ export default function Home() {
                         overflow: "hidden"
                       }}
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}&backgroundColor=e2e8f0`} alt="User avatar" width="32" height="32" />
                     </div>
                   ))}

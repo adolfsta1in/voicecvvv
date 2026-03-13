@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { getUserCVs, deleteCV, renameCV, CVDbRecord } from "@/lib/cv-api";
-import { exportToPDF } from "@/lib/pdf-export";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
-import { getUserSubscription, decrementExportCredit } from "@/lib/subscription-api";
+import { getUserSubscription } from "@/lib/subscription-api";
 import PricingModal from "@/components/PricingModal";
 
 function formatDate(iso: string) {
@@ -35,11 +34,10 @@ export default function AccountPage() {
     const [renameValue, setRenameValue] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const [exportCredits, setExportCredits] = useState(0);
+
     const [isPro, setIsPro] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const [showPricing, setShowPricing] = useState(false);
-    const [isExporting, setIsExporting] = useState(false);
 
     useEffect(() => {
         async function load() {
@@ -50,7 +48,6 @@ export default function AccountPage() {
                 setUserId(user.id);
                 const sub = await getUserSubscription();
                 if (sub) {
-                    setExportCredits(sub.export_credits);
                     setIsPro(sub.plan === 'pro');
                 }
             }
@@ -85,23 +82,7 @@ export default function AccountPage() {
         setRenameValue(cv.name);
     }
 
-    async function handleExportCV(cvContent: any) {
-        if (exportCredits <= 0) {
-            setShowPricing(true);
-            return;
-        }
 
-        setIsExporting(true);
-        try {
-            await exportToPDF(cvContent, (cvContent?.templateId as any) || "classic");
-            setExportCredits(prev => prev - 1);
-            await decrementExportCredit();
-        } catch (error) {
-            console.error("Export failed", error);
-        } finally {
-            setIsExporting(false);
-        }
-    }
 
     return (
         <div

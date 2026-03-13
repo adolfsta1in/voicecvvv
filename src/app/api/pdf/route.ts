@@ -44,8 +44,10 @@ export async function POST(req: NextRequest) {
 
         browser = await puppeteer.launch({
             args: IS_LOCAL ? [] : [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             defaultViewport: (chromium as any).defaultViewport,
             executablePath: executablePath,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             headless: IS_LOCAL ? true : (chromium as any).headless,
         });
 
@@ -66,6 +68,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Return the PDF
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return new NextResponse(pdfBuffer as any, {
             status: 200,
             headers: {
