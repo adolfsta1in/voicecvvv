@@ -136,23 +136,7 @@ export default function AccountPage() {
                         color: "inherit",
                     }}
                 >
-                    <div
-                        style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
-                            background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: 800,
-                            color: "white",
-                            fontSize: 14,
-                        }}
-                    >
-                        V
-                    </div>
-                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>ChatCV</span>
+                    <span style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>ChatCV</span>
                 </Link>
 
                 <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -571,39 +555,7 @@ export default function AccountPage() {
                                             </svg>
                                             Open
                                         </Link>
-                                        <button
-                                            onClick={() => handleExportCV(cv.content)}
-                                            style={{
-                                                flex: 1,
-                                                padding: "8px 0",
-                                                borderRadius: 9,
-                                                border: "1px solid var(--border-color)",
-                                                background: "none",
-                                                color: "var(--foreground)",
-                                                fontSize: "0.8125rem",
-                                                fontWeight: 600,
-                                                cursor: "pointer",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                gap: 5,
-                                                transition: "background 0.15s",
-                                            }}
-                                            onMouseEnter={(e) =>
-                                            ((e.currentTarget as HTMLButtonElement).style.background =
-                                                "var(--surface)")
-                                            }
-                                            onMouseLeave={(e) =>
-                                                ((e.currentTarget as HTMLButtonElement).style.background = "none")
-                                            }
-                                        >
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                <polyline points="7 10 12 15 17 10" />
-                                                <line x1="12" y1="15" x2="12" y2="3" />
-                                            </svg>
-                                            PDF
-                                        </button>
+
                                         <button
                                             onClick={() => startRename(cv)}
                                             style={{

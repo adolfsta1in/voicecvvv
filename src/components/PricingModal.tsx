@@ -73,7 +73,7 @@ export default function PricingModal({ isOpen, onClose, userId }: PricingModalPr
                         Export Your Professional CV
                     </h2>
                     <p style={{ color: "var(--muted)", fontSize: "1.1rem", maxWidth: "500px", margin: "0 auto" }}>
-                        You've built a great CV. Choose a plan to download your high-quality PDF and land your dream job.
+                        Publish and download your CV as a professional PDF ready to send to employers.
                     </p>
                 </div>
 
@@ -102,8 +102,7 @@ export default function PricingModal({ isOpen, onClose, userId }: PricingModalPr
                             {[
                                 "1 PDF Export",
                                 "High-quality download",
-                                "No watermarks",
-                                "Keep your data forever"
+                                "No watermarks"
                             ].map((feature, i) => (
                                 <li key={i} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", fontSize: "0.9375rem" }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -172,10 +171,8 @@ export default function PricingModal({ isOpen, onClose, userId }: PricingModalPr
                         <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px 0", flex: 1 }}>
                             {[
                                 "Up to 10 PDF Exports per month",
-                                "Tailor CVs for different jobs",
                                 "High-quality downloads",
-                                "No watermarks",
-                                "Priority support"
+                                "No watermarks"
                             ].map((feature, i) => (
                                 <li key={i} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", fontSize: "0.9375rem", fontWeight: i === 0 ? 600 : 400 }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

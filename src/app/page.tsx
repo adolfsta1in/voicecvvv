@@ -21,23 +21,7 @@ export default function Home() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "16px",
-              color: "white",
-              fontWeight: 800,
-            }}
-          >
-            V
-          </div>
-          <span style={{ fontWeight: 800, fontSize: "1.125rem" }}>ChatCV</span>
+          <span style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>ChatCV</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
           <a
@@ -902,9 +886,9 @@ export default function Home() {
           <Link href="/terms" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Terms
           </Link>
-          <a href="mailto:support@chatcv.app" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
+          <Link href="/contact" style={{ color: "var(--muted)", textDecoration: "none", transition: "color 0.2s" }} className="hover:text-foreground">
             Contact
-          </a>
+          </Link>
         </div>
       </footer>
     </div>

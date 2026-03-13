@@ -22,6 +22,7 @@ export function ThemeToggle() {
                 color: "var(--foreground)",
                 cursor: "pointer",
                 transition: "all 0.2s",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
             }}
             aria-label="Toggle theme"
         >

@@ -175,23 +175,7 @@ export default function TopBar() {
                         color: "inherit",
                     }}
                 >
-                    <div
-                        style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
-                            background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "14px",
-                            color: "white",
-                            fontWeight: 800,
-                        }}
-                    >
-                        V
-                    </div>
-                    <span style={{ fontWeight: 700, fontSize: "1rem" }}>ChatCV</span>
+                    <span style={{ fontWeight: 800, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>ChatCV</span>
                 </Link>
             </div>
 
