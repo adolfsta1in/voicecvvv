@@ -77,7 +77,7 @@ export default function PrivacyPolicy() {
                 <section style={{ marginBottom: 40 }} className="chat-markdown">
                     <h3>Contact Us</h3>
                     <p>
-                        If you have any questions about this Privacy Policy, please contact us at <a href="mailto:support@chatcvai.com" style={{ color: "var(--color-primary)" }}>support@chatcvai.com</a>.
+                        If you have any questions about this Privacy Policy, please contact us at <a href="mailto:adees.shirinbekk@gmail.com" style={{ color: "var(--color-primary)" }}>adees.shirinbekk@gmail.com</a>.
                     </p>
                 </section>
             </main>

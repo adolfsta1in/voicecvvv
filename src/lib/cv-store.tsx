@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
-import { CVData, ChatMessage, emptyCVData } from "./cv-types";
+import { CVData, ChatMessage, emptyCVData, ResumeScore } from "./cv-types";
 import { TemplateId } from "./cv-templates";
 
 interface CVState {
@@ -10,6 +10,8 @@ interface CVState {
     isLoading: boolean;
     templateId: TemplateId;
     cvId: string | null;
+    resumeScore: ResumeScore | null;
+    isScoring: boolean;
 }
 
 type CVAction =
@@ -25,6 +27,8 @@ type CVAction =
     | { type: "SET_SPACING"; payload: "tight" | "normal" | "relaxed" }
     | { type: "SET_FONT_SIZE"; payload: "small" | "normal" | "large" }
     | { type: "RESTORE_STATE"; payload: Partial<CVState> }
+    | { type: "SET_SCORE_RESULT"; payload: ResumeScore | null }
+    | { type: "SET_SCORING"; payload: boolean }
     | { type: "RESET_CV" };
 
 const LOCAL_STORAGE_KEY = "chatcv_draft_state";
@@ -35,6 +39,8 @@ const initialState: CVState = {
     isLoading: false,
     templateId: "classic",
     cvId: null,
+    resumeScore: null,
+    isScoring: false,
 };
 
 function mergeCV(current: CVData, update: Partial<CVData>): CVData {
@@ -102,6 +108,10 @@ function cvReducer(state: CVState, action: CVAction): CVState {
                 ...state,
                 ...action.payload,
             };
+        case "SET_SCORE_RESULT":
+            return { ...state, resumeScore: action.payload };
+        case "SET_SCORING":
+            return { ...state, isScoring: action.payload };
         case "RESET_CV":
             return {
                 ...initialState,

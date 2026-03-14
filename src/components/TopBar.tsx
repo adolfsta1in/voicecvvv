@@ -9,6 +9,7 @@ import { getUserSubscription, decrementExportCredit } from "@/lib/subscription-a
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
 import PricingModal from "./PricingModal";
+import ScoreModal from "./ScoreModal";
 import { ThemeToggle } from "./ThemeToggle";
 
 export default function TopBar() {
@@ -22,6 +23,7 @@ export default function TopBar() {
     const [exportCredits, setExportCredits] = useState(0);
     const [isPro, setIsPro] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [showScoreModal, setShowScoreModal] = useState(false);
 
     React.useEffect(() => {
         async function loadSub() {
@@ -148,6 +150,34 @@ export default function TopBar() {
         return () => clearTimeout(timeoutId);
     }, [cv, templateId, handleSave]);
 
+    const handleGetScore = async () => {
+        if (!cv.personalInfo.fullName) return;
+        
+        setShowScoreModal(true);
+        // If we already have a score and it's somewhat recent, we could skip refetching, 
+        // but for now let's force a fetch or rely on state. At least set scoring to true.
+        dispatch({ type: "SET_SCORING", payload: true });
+
+        try {
+            const res = await fetch("/api/score", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cvData: cv }),
+            });
+
+            if (!res.ok) throw new Error("Score API failed");
+
+            const data = await res.json();
+            if (data.score) {
+                dispatch({ type: "SET_SCORE_RESULT", payload: data });
+            }
+        } catch (error) {
+            console.error("Failed to get AI score", error);
+        } finally {
+            dispatch({ type: "SET_SCORING", payload: false });
+        }
+    };
+
     return (
         <div
             style={{
@@ -216,6 +246,32 @@ export default function TopBar() {
                 >
                     {progress}%
                 </span>
+
+                {/* AI Score Button */}
+                <div style={{ width: 1, height: 24, background: "var(--border-color)", margin: "0 8px" }} />
+                
+                <button
+                    onClick={state.resumeScore ? () => setShowScoreModal(true) : handleGetScore}
+                    disabled={!cv.personalInfo.fullName || state.isScoring}
+                    style={{
+                        background: state.resumeScore ? "transparent" : "var(--surface)",
+                        border: state.resumeScore ? "none" : "1px solid var(--border-color)",
+                        padding: "4px 12px",
+                        borderRadius: 100,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        cursor: (!cv.personalInfo.fullName || state.isScoring) ? "default" : "pointer",
+                        opacity: (!cv.personalInfo.fullName) ? 0.5 : 1,
+                        transition: "all 0.2s",
+                        color: "var(--foreground)",
+                    }}
+                >
+                    <span style={{ fontSize: "0.875rem" }}>✨</span>
+                    <span style={{ fontSize: "0.75rem", fontWeight: 700, color: state.resumeScore ? (state.resumeScore.score >= 80 ? "#10b981" : state.resumeScore.score >= 50 ? "#f59e0b" : "#ef4444") : "var(--muted)" }}>
+                        {state.isScoring ? "Scoring..." : state.resumeScore ? `${state.resumeScore.score}/100` : "Get AI Score"}
+                    </span>
+                </button>
             </div>
 
             {/* Right */}
@@ -380,6 +436,7 @@ export default function TopBar() {
             </div>
 
             <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} userId={userId} />
+            <ScoreModal isOpen={showScoreModal} onClose={() => setShowScoreModal(false)} />
         </div>
     );
 }

@@ -61,6 +61,12 @@ export interface AIResponse {
   cvUpdate?: Partial<CVData>;
 }
 
+export interface ResumeScore {
+  score: number;
+  feedback: string[];
+  questions: string[];
+}
+
 export const emptyCVData: CVData = {
   personalInfo: {
     fullName: "",
